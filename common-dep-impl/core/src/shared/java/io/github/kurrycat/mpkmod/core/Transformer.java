@@ -6,7 +6,7 @@ import io.github.kurrycat.mpkmod.api.log.LogManager;
 import org.objectweb.asm.tree.ClassNode;
 
 public interface Transformer {
-    ILogger LOGGER = LogManager.instance().createLogger(Tags.MOD_ID + "/core");
+    ILogger LOGGER = LogManager.HANDLE.get().createLogger(Tags.MOD_ID + "/core");
 
     boolean shouldTransform(String className);
 

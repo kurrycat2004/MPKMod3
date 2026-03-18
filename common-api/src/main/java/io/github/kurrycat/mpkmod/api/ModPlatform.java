@@ -5,19 +5,20 @@ import io.github.kurrycat.mpkmod.api.log.LogManager;
 import io.github.kurrycat.mpkmod.api.minecraft.IFileEnv;
 import io.github.kurrycat.mpkmod.api.minecraft.IModInfo;
 import io.github.kurrycat.mpkmod.api.module.ModuleRegistry;
-import io.github.kurrycat.mpkmod.api.service.ServiceManager;
+import io.github.kurrycat.mpkmod.api.service.ServiceHandle;
+import io.github.kurrycat.mpkmod.api.service.Services;
 
 public interface ModPlatform {
-    static ModPlatform instance() {
-        return ServiceManager.instance().get(ModPlatform.class);
-    }
+    ServiceHandle<ModPlatform> HANDLE = Services.getHandle(ModPlatform.class);
 
-    ILogger LOGGER = LogManager.instance().createLogger(instance().modInfo().modId());
+    ILogger LOGGER = LogManager.HANDLE.get().createLogger(HANDLE.get().modInfo().modId());
 
     static void init() {
-        LOGGER.info("Initializing {} ModPlatform for loader \"{}\"",
-                instance().modInfo().modName(), instance().modInfo().modLoader());
-        ModuleRegistry.instance().loadAllModules();
+        ModPlatform modPlatform = HANDLE.get();
+        IModInfo modInfo = modPlatform.modInfo();
+        LOGGER.info("Initializing {} ModPlatform for loader \"{}\"", modInfo.modName(), modInfo.modLoader());
+
+        ModuleRegistry.HANDLE.get().loadAllModules();
     }
 
     IModInfo modInfo();

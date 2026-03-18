@@ -21,7 +21,7 @@ public interface IFileEnv {
      * @return the path to the mod's config directory
      */
     default Path modConfigPath() {
-        return gameConfigPath().resolve(ModPlatform.instance().modInfo().modId() + ".cfg");
+        return gameConfigPath().resolve(ModPlatform.HANDLE.get().modInfo().modId() + ".cfg");
     }
 
     /**

@@ -1,6 +1,7 @@
 package io.github.kurrycat.mpkmod.api.render;
 
-import io.github.kurrycat.mpkmod.api.service.ServiceManager;
+import io.github.kurrycat.mpkmod.api.service.ServiceHandle;
+import io.github.kurrycat.mpkmod.api.service.Services;
 
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
@@ -8,9 +9,7 @@ import java.nio.IntBuffer;
 import java.util.List;
 
 public interface RenderBackend {
-    static RenderBackend instance() {
-        return ServiceManager.instance().get(RenderBackend.class);
-    }
+    ServiceHandle<RenderBackend> HANDLE = Services.getHandle(RenderBackend.class);
 
     void reallocVertexBuffers(int posSize, int colorSize, int uvSize);
 

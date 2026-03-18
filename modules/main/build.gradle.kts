@@ -1,11 +1,7 @@
 plugins {
-    `java-library`
-}
-
-repositories {
-    mavenCentral()
+    id("jar-defaults-conventions")
 }
 
 dependencies {
-    compileOnly(project(":common-api"))
+    compileOnly(projects.commonApi)
 }

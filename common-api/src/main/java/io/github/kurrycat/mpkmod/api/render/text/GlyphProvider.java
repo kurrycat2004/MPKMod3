@@ -1,15 +1,13 @@
 package io.github.kurrycat.mpkmod.api.render.text;
 
-import io.github.kurrycat.mpkmod.annotation.OutArg;
 import io.github.kurrycat.mpkmod.api.resource.IResource;
-import io.github.kurrycat.mpkmod.api.service.ServiceManager;
+import io.github.kurrycat.mpkmod.api.service.ServiceHandle;
+import io.github.kurrycat.mpkmod.api.service.Services;
 
 import java.util.Random;
 
 public interface GlyphProvider {
-    static GlyphProvider instance() {
-        return ServiceManager.instance().get(GlyphProvider.class);
-    }
+    ServiceHandle<GlyphProvider> HANDLE = Services.getHandle(GlyphProvider.class);
 
     final class GlyphData {
         public IResource texture;
@@ -34,7 +32,7 @@ public interface GlyphProvider {
         }
     }
 
-    boolean getGlyph(int codepoint, @OutArg GlyphData out);
+    boolean getGlyph(int codepoint, GlyphData out);
 
     int randomGlyphWithXAdvance(Random random, float xAdvance);
 }

@@ -41,17 +41,17 @@ public final class CommandReceiverImpl implements CommandReceiver {
 
     @Override
     public int currVtxIdx() {
-        return RenderBackend.instance().vertexPositions().position() / 3;
+        return RenderBackend.HANDLE.get().vertexPositions().position() / 3;
     }
 
     @Override
     public int currIdx() {
-        return RenderBackend.instance().indices().position();
+        return RenderBackend.HANDLE.get().indices().position();
     }
 
     @Override
     public void pushVtx(float x, float y, float z, int argb, float u, float v) {
-        final RenderBackend backend = RenderBackend.instance();
+        final RenderBackend backend = RenderBackend.HANDLE.get();
         FloatBuffer pos = backend.vertexPositions();
         if (pos.remaining() < 3) {
             backend.reallocVertexBuffers(
@@ -71,7 +71,7 @@ public final class CommandReceiverImpl implements CommandReceiver {
 
     @Override
     public void pushIdx(int idx) {
-        final RenderBackend backend = RenderBackend.instance();
+        final RenderBackend backend = RenderBackend.HANDLE.get();
         if (backend.indices().remaining() < 1) {
             backend.reallocIndexBuffer(backend.indices().capacity() * 2);
         }
@@ -111,7 +111,7 @@ public final class CommandReceiverImpl implements CommandReceiver {
     @Override
     public void flushDrawCommands() {
         commands.sort(DRAW_COMMAND_COMPARATOR);
-        RenderBackend.instance().flush(commands);
+        RenderBackend.HANDLE.get().flush(commands);
         for (IDrawCommand command : commands) {
             commandPool.push(command);
         }

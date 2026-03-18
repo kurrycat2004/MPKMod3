@@ -1,14 +1,13 @@
 package io.github.kurrycat.mpkmod.api.resource;
 
-import io.github.kurrycat.mpkmod.api.service.ServiceManager;
+import io.github.kurrycat.mpkmod.api.service.ServiceHandle;
+import io.github.kurrycat.mpkmod.api.service.Services;
 
 import java.io.IOException;
 import java.io.InputStream;
 
 public interface ResourceManager {
-    static ResourceManager instance() {
-        return ServiceManager.instance().get(ResourceManager.class);
-    }
+    ServiceHandle<ResourceManager> HANDLE = Services.getHandle(ResourceManager.class);
 
     IResource resource(String domain, String path);
 

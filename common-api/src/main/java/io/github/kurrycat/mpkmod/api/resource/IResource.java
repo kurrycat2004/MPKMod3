@@ -14,19 +14,19 @@ public interface IResource {
     Object backendResource();
 
     static IResource of(String domain, String path) {
-        return ResourceManager.instance().resource(domain, path);
+        return ResourceManager.HANDLE.get().resource(domain, path);
     }
 
     static IResource ofMc(String path) {
-        return ResourceManager.instance().resource("minecraft", path);
+        return ResourceManager.HANDLE.get().resource("minecraft", path);
     }
 
     static IResource ofSelf(String path) {
-        return ResourceManager.instance().resource(ModPlatform.instance().modInfo().modId(), path);
+        return ResourceManager.HANDLE.get().resource(ModPlatform.HANDLE.get().modInfo().modId(), path);
     }
 
     default String readUtf8() throws IOException {
-        try (InputStream stream = ResourceManager.instance().inputStream(this)) {
+        try (InputStream stream = ResourceManager.HANDLE.get().inputStream(this)) {
             return new String(stream.readAllBytes(), StandardCharsets.UTF_8);
         }
     }

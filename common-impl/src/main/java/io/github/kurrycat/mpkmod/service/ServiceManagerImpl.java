@@ -4,13 +4,12 @@ import com.google.auto.service.AutoService;
 import io.github.kurrycat.mpkmod.Tags;
 import io.github.kurrycat.mpkmod.api.log.ILogger;
 import io.github.kurrycat.mpkmod.api.log.LogManager;
+import io.github.kurrycat.mpkmod.api.service.ServiceHandle;
 import io.github.kurrycat.mpkmod.api.service.ServiceManager;
 import io.github.kurrycat.mpkmod.api.service.ServiceProvider;
 import io.github.kurrycat.mpkmod.log.StdoutLogger;
-import io.github.kurrycat.mpkmod.util.LogUtil;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -64,10 +63,13 @@ public final class ServiceManagerImpl implements ServiceManager {
     }
 
     @Override
-    public void init() {
+    public void initialize() {
         if (initialized) return;
         LOGGER.log("Initializing logger service...");
-        LOGGER = LogManager.instance().createLogger(Tags.MOD_ID).createSubLogger("service").createFixed(LOG_LEVEL);
+        LOGGER = LogManager.HANDLE.get()
+                .createLogger(Tags.MOD_ID)
+                .createSubLogger("service")
+                .createFixed(LOG_LEVEL);
         if (LOGGER.parentLogger() instanceof StdoutLogger) {
             LOGGER.log("Failed to initialize logger service, continuing with fallback logger");
         } else {
@@ -77,9 +79,10 @@ public final class ServiceManagerImpl implements ServiceManager {
     }
 
     @Override
-    @SuppressWarnings("unchecked")
-    public <S> S get(Class<S> serviceClass) {
-        return ((RawServiceHolder<S>) HOLDERS.get(serviceClass)).current();
+    public <S> ServiceHandle<S> getHandle(Class<S> serviceClass) {
+        @SuppressWarnings("unchecked")
+        RawServiceHolder<S> holder = (RawServiceHolder<S>) HOLDERS.get(serviceClass);
+        return holder;
     }
 
     @Override
@@ -88,7 +91,7 @@ public final class ServiceManagerImpl implements ServiceManager {
     }
 
     @Override
-    public void switchToService(ServiceProvider provider) {
+    public void switchToProvider(ServiceProvider provider) {
         List<ServiceProvider> providers;
         if (
                 !(provider instanceof ServiceProviderWrapper wrapper) ||
@@ -107,15 +110,10 @@ public final class ServiceManagerImpl implements ServiceManager {
 
         LOGGER.log("Switching service {} from {} to provider {}",
                 provider.type().getName(),
-                HOLDERS.get(provider.type()).current().getClass().getName(),
+                HOLDERS.get(provider.type()).get().getClass().getName(),
                 provider.name()
         );
         HOLDERS.get(provider.type()).switchTo(provider);
-    }
-
-    @Override
-    public void readyForSwitch(Class<?> serviceClass) {
-        HOLDERS.get(serviceClass).readyForSwitch();
     }
 
     private Object rawLoadOrThrow(Class<?> serviceClass) {
@@ -161,22 +159,5 @@ public final class ServiceManagerImpl implements ServiceManager {
         }
 
         throw new IllegalStateException(sb.toString());
-    }
-
-    private Object tryLoad(ServiceProvider provider, Map<ServiceProvider, String> errors) {
-        Optional<String> reason;
-        try {
-            reason = provider.invalidReason();
-        } catch (Exception e) {
-            StringWriter builder = new StringWriter();
-            builder.append("Exception while checking invalid reason: \n");
-            LogUtil.appendPrefixedException(builder, "\t\t", e);
-            reason = Optional.of(builder.toString());
-        }
-        if (reason.isEmpty()) {
-            return provider.provide();
-        }
-        errors.put(provider, reason.get());
-        return null;
     }
 }

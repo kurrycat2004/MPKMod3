@@ -1,99 +1,14 @@
-import buildlogic.embedJarTaskResult
-import buildlogic.embedRelocate
-import buildlogic.mergeMergableFiles
-import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
-
 plugins {
-    `java-library`
-    id("buildlogic.split-jars")
-    id("buildlogic.auto-service")
+    id("jar-defaults-conventions")
 }
-
-java {
-    toolchain.languageVersion = JavaLanguageVersion.of(21)
-}
-
-repositories {
-    mavenCentral()
-    maven("https://jitpack.io")
-    maven("https://maven.wagyourtail.xyz/releases")
-    maven("https://maven.wagyourtail.xyz/snapshots")
-    maven("https://maven.legacyfabric.net")
-}
-
-val relocateDeps = listOf(
-    "com.google.gson",
-    "de.jcm.discordgamesdk",
-    "org.antlr",
-    "org.checkerframework",
-    /*"org.objectweb.asm",*/
-    "org.tomlj",
-    //"xyz.wagyourtail.jvmdg",
-)
-
-val shadedDeps = listOf(
-    "com.github.JnCrMx:discord-game-sdk4j:${property("discordGameSdkVersion")}",
-    "org.tomlj:tomlj:${property("tomljVersion")}",
-    /*"xyz.wagyourtail.jvmdowngrader:jvmdowngrader:${property("jvmDowngraderVersion")}",
-    "xyz.wagyourtail.jvmdowngrader:jvmdowngrader-java-api:${property("jvmDowngraderVersion")}",*/
-)
-
-val modGroup = property("modGroup") as String
-
-splitJars {
-    archiveBaseName = "${project.property("modId")}"
-    archiveVersion = "${project.property("modVersion")}"
-    relocateDeps.forEach {
-        relocate(it, "${modGroup}.shaded.$it") {
-            exclude("${modGroup}.**")
-        }
-    }
-}
-
-val javaApiJar: Configuration = project.configurations.create("javaApiJar")
-val shadowJavaApiJar = tasks.register<ShadowJar>("shadowJavaApiJar") {
-    archiveFileName = "java-api.jar"
-    configurations = listOf(javaApiJar)
-    relocate("org.objectweb.asm", "xyz.wagyourtail.jvmdg.shade.asm")
-    manifest {
-        attributes(
-            "Implementation-Version" to project.property("jvmDowngraderVersion"),
-        )
-    }
-}
-val extraJar = tasks.register<Jar>("extraJar") {
-    archiveClassifier.set("extra")
-    dependsOn(shadowJavaApiJar)
-    from(shadowJavaApiJar.map(Jar::getArchiveFile)) {
-        into("META-INF/lib")
-    }
-    from(zipTree(shadowJavaApiJar.map(Jar::getArchiveFile))) {
-        include("META-INF/coverage/**")
-    }
-    mergeMergableFiles()
-}
-embedJarTaskResult(extraJar)
 
 dependencies {
-    compileOnly(project(":common-processor"))
-    annotationProcessor(project(":common-processor"))
-    embedApi(project(":common-api"))
-    embedApi(project(":inject-tags"))
+    compileOnly(libs.auto.service.annotations)
+    annotationProcessor(libs.auto.service)
 
-    rootProject.subprojects.filter { it.path.startsWith(":common-dep-impl:") }
-        .forEach { embed(project(it.path)) }
+    compileOnly(libs.tomlj)
+    compileOnly(libs.jvmdowngrader)
 
-    javaApiJar("xyz.wagyourtail.jvmdowngrader:jvmdowngrader-java-api:${property("jvmDowngraderVersion")}:downgraded-8")
-
-    listOf(
-        "xyz.wagyourtail.jvmdowngrader:jvmdowngrader:${property("jvmDowngraderVersion")}",
-        "xyz.wagyourtail.jvmdowngrader:jvmdowngrader-java-api:${property("jvmDowngraderVersion")}",
-    ).forEach {
-        embedRelocate(
-            it,
-            "org.objectweb.asm", "xyz.wagyourtail.jvmdg.shade.asm",
-            "api"
-        )
-    }
-    shadedDeps.forEach { depNotation -> embedApi(depNotation) }
+    compileOnly(projects.injectTags)
+    compileOnly(projects.commonApi)
 }

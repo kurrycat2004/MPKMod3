@@ -1,15 +1,14 @@
 package io.github.kurrycat.mpkmod.api.util;
 
-import io.github.kurrycat.mpkmod.api.service.ServiceManager;
+import io.github.kurrycat.mpkmod.api.service.ServiceHandle;
+import io.github.kurrycat.mpkmod.api.service.Services;
 
 import java.io.IOException;
 import java.nio.file.FileSystem;
 import java.nio.file.Path;
 
 public interface FileUtil {
-    static FileUtil instance() {
-        return ServiceManager.instance().get(FileUtil.class);
-    }
+    ServiceHandle<FileUtil> HANDLE = Services.getHandle(FileUtil.class);
 
     /**
      * If path is a directory, return the path itself. <br>

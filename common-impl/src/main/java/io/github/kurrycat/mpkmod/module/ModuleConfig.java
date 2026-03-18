@@ -20,6 +20,24 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
+
+/**
+ * {@snippet lang = TOML:
+ * format_version = 1
+ * id = "examplemod"
+ * version = "1.0.0"
+ * entrypoint = "com.example.example_mod.ExampleModule"
+ * name = "ExampleModule"
+ * description = "Example Module"
+ * authors = ["ExampleAuthor"]
+ * # source = "https://github.com/example/example-mod"
+ * license = "MIT"
+ * # icon = "assets/modules/examplemod/icon.png"
+ *
+ * [dependencies]
+ * # core = ">=1.0.0"
+ *}
+ */
 public final class ModuleConfig {
     private static final String MODULES_DIR = "META-INF/mpkmodules";
     private static final Pattern VALID_ID_PATTERN = Pattern.compile("[a-z0-9_]+");

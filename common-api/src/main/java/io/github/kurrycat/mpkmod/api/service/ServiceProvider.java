@@ -21,7 +21,7 @@ public interface ServiceProvider {
 
     /**
      * If this returns true, the switch will be deferred until
-     * {@link ServiceManager#readyForSwitch(Class)} is called.
+     * {@link ServiceHandle#readyForSwitch()}} is called.
      *
      * @return true if the switch should be deferred, false otherwise
      */

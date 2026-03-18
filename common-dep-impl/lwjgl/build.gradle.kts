@@ -1,49 +1,44 @@
-import buildlogic.mergeMergableFiles
+import buildlogic.MergeServiceFilesTask
+import buildlogic.annotationProcessor
+import buildlogic.compileOnly
 
 plugins {
-    `java-library`
-    id("buildlogic.gl-common-stubs")
-    id("buildlogic.auto-service")
-    id("buildlogic.merge-util")
+    id("jar-defaults-conventions")
 }
 
-java {
-    toolchain.languageVersion = JavaLanguageVersion.of(21)
-    withSourcesJar()
-}
+val shared by sourceSets.creating
+val opengl by sourceSets.creating { compileClasspath += shared.output }
+val lwjgl2 by sourceSets.creating { compileClasspath += shared.output }
+val lwjgl3 by sourceSets.creating { compileClasspath += shared.output }
 
-repositories {
-    mavenCentral()
-    maven("https://jitpack.io")
-    maven("https://maven.legacyfabric.net")
-}
-
-lwjglStubs {
-    lwjgl2Dep.set("org.lwjgl.lwjgl:lwjgl:2.9.4+legacyfabric.8")
-    lwjgl3Dep.set("org.lwjgl:lwjgl-opengl:3.3.3")
-}
-
-val lwjgl2: SourceSet by sourceSets.creating
-val lwjgl2CompOnly: Configuration = configurations[lwjgl2.compileOnlyConfigurationName]
-
-val lwjgl3: SourceSet by sourceSets.creating
-val lwjgl3CompOnly: Configuration = configurations[lwjgl3.compileOnlyConfigurationName]
+val variants = listOf(shared, opengl, lwjgl2, lwjgl3)
 
 dependencies {
-    sourceSets.forEach { add(it.compileOnlyConfigurationName, project(":common-api")) }
+    variants.forEach {
+        it.compileOnly(this, projects.commonApi)
+        it.compileOnly(this, libs.auto.service.annotations)
+        it.annotationProcessor(this, libs.auto.service)
+    }
 
-    lwjgl2CompOnly(lwjglStubs.lwjgl2Dep)
-    lwjgl3CompOnly(lwjglStubs.lwjgl3Dep)
-    compileOnly(lwjglStubs.stubsSourceSet.get().output)
+    lwjgl2.compileOnly(this, libs.comp.lwjgl.lwjgl2)
+    lwjgl3.compileOnly(this, libs.comp.lwjgl.lwjgl3)
+    opengl.compileOnly(this, libs.joml)
+}
+
+val mergeServiceFiles by tasks.registering(MergeServiceFilesTask::class) {
+    sourceRoots.from(variants.map { it.output })
 }
 
 tasks.jar {
-    sourceSets.filter { !it.name.endsWith("stubs", true) }
-        .forEach { from(it.output) }
-    mergeMergableFiles()
+    from(variants.map { it.output }) {
+        exclude("META-INF/services/**")
+    }
+    from(mergeServiceFiles)
 }
 
 tasks.named<Jar>("sourcesJar") {
-    sourceSets.forEach { from(it.allSource) }
+    from(variants.map { it.allSource }) {
+        exclude("META-INF/services/**")
+    }
+    from(mergeServiceFiles)
 }
-

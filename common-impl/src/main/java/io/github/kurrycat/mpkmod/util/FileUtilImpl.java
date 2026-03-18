@@ -1,8 +1,8 @@
 package io.github.kurrycat.mpkmod.util;
 
 import com.google.auto.service.AutoService;
-import io.github.kurrycat.mpkmod.api.service.StandardServiceProvider;
 import io.github.kurrycat.mpkmod.api.service.ServiceProvider;
+import io.github.kurrycat.mpkmod.api.service.StandardServiceProvider;
 import io.github.kurrycat.mpkmod.api.util.FileUtil;
 
 import java.io.IOException;
@@ -21,7 +21,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Stream;
-import java.util.zip.ZipError;
 
 public final class FileUtilImpl implements FileUtil {
     @AutoService(ServiceProvider.class)
@@ -63,7 +62,7 @@ public final class FileUtilImpl implements FileUtil {
                 fileSystem = FileSystems.newFileSystem(jarUri, Collections.emptyMap());
             } catch (FileSystemAlreadyExistsException ignored2) {
                 fileSystem = FileSystems.getFileSystem(jarUri);
-            } catch (IOException | ZipError e) {
+            } catch (IOException e) {
                 throw new IOException("Error accessing " + jarUri + ": " + e, e);
             }
         }

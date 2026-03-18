@@ -1,40 +1,41 @@
-import buildlogic.mergeMergableFiles
+import buildlogic.MergeServiceFilesTask
+import buildlogic.annotationProcessor
+import buildlogic.compileOnly
 
 plugins {
-    `java-library`
-    id("buildlogic.auto-service")
-    id("buildlogic.merge-util")
+    id("jar-defaults-conventions")
 }
 
-java {
-    toolchain.languageVersion = JavaLanguageVersion.of(21)
-    withSourcesJar()
-}
+val shared by sourceSets.creating
+val log4j by sourceSets.creating { compileClasspath += shared.output }
+val slf4j by sourceSets.creating { compileClasspath += shared.output }
 
-repositories {
-    mavenCentral()
-}
-
-val shared: SourceSet by sourceSets.creating
-
-val log4j: SourceSet by sourceSets.creating { compileClasspath += shared.output }
-val log4jCompOnly: Configuration = configurations[log4j.compileOnlyConfigurationName]
-
-val slf4j: SourceSet by sourceSets.creating { compileClasspath += shared.output }
-val slf4jCompOnly: Configuration = configurations[slf4j.compileOnlyConfigurationName]
+val variants = listOf(shared, log4j, slf4j)
 
 dependencies {
-    sourceSets.forEach { add(it.compileOnlyConfigurationName, project(":common-api")) }
+    variants.forEach {
+        it.compileOnly(this, projects.commonApi)
+        it.compileOnly(this, libs.auto.service.annotations)
+        it.annotationProcessor(this, libs.auto.service)
+    }
+    log4j.compileOnly(this, libs.comp.log4j.api)
+    slf4j.compileOnly(this, libs.comp.slf4j.api)
+}
 
-    log4jCompOnly("org.apache.logging.log4j:log4j-api:2.0-beta9")
-    slf4jCompOnly("org.slf4j:slf4j-api:1.8.0-beta4")
+val mergeServiceFiles by tasks.registering(MergeServiceFilesTask::class) {
+    sourceRoots.from(variants.map { it.output })
 }
 
 tasks.jar {
-    sourceSets.forEach { from(it.output) }
-    mergeMergableFiles()
+    from(variants.map { it.output }) {
+        exclude("META-INF/services/**")
+    }
+    from(mergeServiceFiles)
 }
 
 tasks.named<Jar>("sourcesJar") {
-    sourceSets.forEach { from(it.allSource) }
+    from(variants.map { it.allSource }) {
+        exclude("META-INF/services/**")
+    }
+    from(mergeServiceFiles)
 }

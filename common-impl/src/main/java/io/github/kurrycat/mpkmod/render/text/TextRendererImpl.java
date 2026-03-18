@@ -31,8 +31,8 @@ public final class TextRendererImpl implements TextRenderer {
         textLength = MathUtil.clamp(textLength, 0, len - textOffset);
         if (textLength <= 0) return x;
 
-        final GlyphProvider glyphProvider = GlyphProvider.instance();
-        final CommandReceiver cmd = CommandReceiver.instance();
+        final GlyphProvider glyphProvider = GlyphProvider.HANDLE.get();
+        final CommandReceiver cmd = CommandReceiver.HANDLE.get();
 
         float penX = x;
         buffer.reset();

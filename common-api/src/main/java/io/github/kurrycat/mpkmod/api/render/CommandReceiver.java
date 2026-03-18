@@ -1,12 +1,11 @@
 package io.github.kurrycat.mpkmod.api.render;
 
 import io.github.kurrycat.mpkmod.api.resource.IResource;
-import io.github.kurrycat.mpkmod.api.service.ServiceManager;
+import io.github.kurrycat.mpkmod.api.service.ServiceHandle;
+import io.github.kurrycat.mpkmod.api.service.Services;
 
 public interface CommandReceiver {
-    static CommandReceiver instance() {
-        return ServiceManager.instance().get(CommandReceiver.class);
-    }
+    ServiceHandle<CommandReceiver> HANDLE = Services.getHandle(CommandReceiver.class);
 
     int COMMAND_POOL_BATCH_SIZE = 64;
     int INITIAL_VERTEX_BUFFER_SIZE = 256;

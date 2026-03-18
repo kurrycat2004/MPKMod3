@@ -4,8 +4,8 @@ import com.google.auto.service.AutoService;
 import io.github.kurrycat.mpkmod.api.render.CommandReceiver;
 import io.github.kurrycat.mpkmod.api.render.DrawMode;
 import io.github.kurrycat.mpkmod.api.render.Render2D;
-import io.github.kurrycat.mpkmod.api.service.StandardServiceProvider;
 import io.github.kurrycat.mpkmod.api.service.ServiceProvider;
+import io.github.kurrycat.mpkmod.api.service.StandardServiceProvider;
 
 public final class Render2DImpl implements Render2D {
     @AutoService(ServiceProvider.class)
@@ -17,7 +17,7 @@ public final class Render2DImpl implements Render2D {
 
     @Override
     public void pushRect(float x, float y, float w, float h, int argb) {
-        final CommandReceiver cmd = CommandReceiver.instance();
+        final CommandReceiver cmd = CommandReceiver.HANDLE.get();
         int startVtx = cmd.currVtxIdx();
         cmd.pushVtx(x, y, 0.0f, argb, 0, 0);
         cmd.pushVtx(x, y + h, 0.0f, argb, 0, 0);

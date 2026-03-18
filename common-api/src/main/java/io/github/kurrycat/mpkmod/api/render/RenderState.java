@@ -1,12 +1,11 @@
 package io.github.kurrycat.mpkmod.api.render;
 
-import io.github.kurrycat.mpkmod.api.service.ServiceManager;
-import io.github.kurrycat.mpkmod.lib.joml.Matrix4f;
+import io.github.kurrycat.mpkmod.api.service.ServiceHandle;
+import io.github.kurrycat.mpkmod.api.service.Services;
+import org.joml.Matrix4f;
 
 public interface RenderState {
-    static RenderState instance() {
-        return ServiceManager.instance().get(RenderState.class);
-    }
+    ServiceHandle<RenderState> HANDLE = Services.getHandle(RenderState.class);
 
     RenderLayer layer();
 
