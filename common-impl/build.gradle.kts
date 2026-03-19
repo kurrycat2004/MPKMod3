@@ -6,7 +6,7 @@ dependencies {
     compileOnly(libs.auto.service.annotations)
     annotationProcessor(libs.auto.service)
 
-    compileOnly(libs.tomlj)
+    compileOnly(libs.jtoml)
     compileOnly(libs.jvmdowngrader)
 
     compileOnly(projects.injectTags)

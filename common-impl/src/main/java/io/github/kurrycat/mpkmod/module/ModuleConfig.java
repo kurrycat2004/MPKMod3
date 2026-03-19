@@ -4,10 +4,14 @@ import io.github.kurrycat.mpkmod.api.module.IVersion;
 import io.github.kurrycat.mpkmod.api.module.IVersionConstraint;
 import io.github.kurrycat.mpkmod.api.module.InvalidVersionConstraintException;
 import io.github.kurrycat.mpkmod.util.FileUtilImpl;
-import org.tomlj.Toml;
-import org.tomlj.TomlArray;
-import org.tomlj.TomlParseResult;
-import org.tomlj.TomlTable;
+import io.github.wasabithumb.jtoml.JToml;
+import io.github.wasabithumb.jtoml.document.TomlDocument;
+import io.github.wasabithumb.jtoml.except.TomlException;
+import io.github.wasabithumb.jtoml.except.TomlIOException;
+import io.github.wasabithumb.jtoml.key.TomlKey;
+import io.github.wasabithumb.jtoml.value.TomlValue;
+import io.github.wasabithumb.jtoml.value.array.TomlArray;
+import io.github.wasabithumb.jtoml.value.table.TomlTable;
 
 import java.io.IOException;
 import java.nio.file.DirectoryStream;
@@ -18,6 +22,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 
@@ -42,6 +48,18 @@ public final class ModuleConfig {
     private static final String MODULES_DIR = "META-INF/mpkmodules";
     private static final Pattern VALID_ID_PATTERN = Pattern.compile("[a-z0-9_]+");
 
+    private static final TomlKey FORMAT_VERSION = TomlKey.parse("format_version");
+    private static final TomlKey ID = TomlKey.parse("id");
+    private static final TomlKey VERSION = TomlKey.parse("version");
+    private static final TomlKey ENTRYPOINT = TomlKey.parse("entrypoint");
+    private static final TomlKey NAME = TomlKey.parse("name");
+    private static final TomlKey DESCRIPTION = TomlKey.parse("description");
+    private static final TomlKey AUTHORS = TomlKey.parse("authors");
+    private static final TomlKey SOURCE = TomlKey.parse("source");
+    private static final TomlKey LICENSE = TomlKey.parse("license");
+    private static final TomlKey ICON = TomlKey.parse("icon");
+    private static final TomlKey DEPENDENCIES = TomlKey.parse("dependencies");
+
     private ModuleConfig() {
     }
 
@@ -63,70 +81,66 @@ public final class ModuleConfig {
     }
 
     private static ModuleEntry loadFromFile(Path root, Path configFile) throws ModuleLoadException {
-        TomlParseResult result;
+        JToml toml = JToml.jToml();
+        TomlDocument doc;
         try {
-            result = Toml.parse(configFile);
-        } catch (Exception e) {
-            throw new ModuleLoadException("Failed to parse module .toml", e);
+            doc = toml.read(configFile);
+        } catch (TomlIOException e) {
+            throw new ModuleLoadException("Failed to open module .toml", e.getCause());
+        } catch (TomlException e) {
+            throw new ModuleLoadException("Failed to read module .toml", e);
         }
 
-        if (result.hasErrors()) {
-            ModuleLoadException.Builder builder = new ModuleLoadException.Builder("Syntax errors while parsing modules.toml");
-            result.errors().forEach(error -> builder.addError(
-                    "At line " + error.position().line() + ", column " + error.position().column() + ": " + error.getMessage()
-            ));
-            throw builder.build();
-        }
+        ModuleLoadException.Builder errors = new ModuleLoadException.Builder(
+                "Invalid module definition: " + configFile
+        );
 
-        ModuleLoadException.Builder errors =
-                new ModuleLoadException.Builder("Invalid module definition: " + configFile);
-
-        Long formatVersion = getLong(result, "format_version", errors, true);
+        Long formatVersion = getLong(doc, FORMAT_VERSION, true, errors);
         if (formatVersion == null || formatVersion != 1) {
             throw errors.build();
         }
 
-        return parseModuleEntry(root, result, errors);
+        return parseModuleEntry(root, doc, errors);
     }
 
+    // TODO: separate fatal errors from non-fatal errors
     private static ModuleEntry parseModuleEntry(Path root, TomlTable table, ModuleLoadException.Builder errors) throws ModuleLoadException {
-        String id = getString(table, "id", errors, true);
+        String id = getString(table, ID, true, errors);
         if (id != null && !VALID_ID_PATTERN.matcher(id).matches()) {
-            errors.addError("Invalid module displayName: '" + id + "'. Must match [a-z0-9_]+.");
+            errors.addError("Invalid module id: '" + id + "'. Must match [a-z0-9_]+.");
         }
 
-        String versionString = getString(table, "version", errors, true);
+        String versionString = getString(table, VERSION, true, errors);
         IVersion version = null;
-        if (versionString != null) {
-            try {
-                version = SemVer.parse(versionString);
-            } catch (SemVer.InvalidVersionFormatException e) {
-                errors.addError(e);
-            }
+        try {
+            version = SemVer.parse(versionString);
+        } catch (SemVer.InvalidVersionFormatException e) {
+            errors.addError(e);
         }
 
-        String entrypoint = getString(table, "entrypoint", errors, true);
-        String name = getString(table, "name", errors, true);
-        String description = getString(table, "description", errors, false);
-        List<String> authors = getStringList(table, "authors", errors, false);
-        String source = getString(table, "source", errors, false);
-        String license = getString(table, "license", errors, false);
+        String entrypoint = getString(table, ENTRYPOINT, true, errors);
+        String name = getString(table, NAME, true, errors);
+        String description = getString(table, DESCRIPTION, false, errors);
+        List<String> authors = getStringArray(table, AUTHORS, false, errors);
+        String source = getString(table, SOURCE, false, errors);
+        String license = getString(table, LICENSE, false, errors);
 
-        String iconString = getString(table, "icon", errors, false);
-        Path icon = null;
-        if (iconString != null) icon = FileUtilImpl.resolve(root, iconString);
+        String iconString = getString(table, ICON, false, errors);
 
-        Map<String, String> dependencyStrings = getStringMap(table, "dependencies", errors, false);
+        TomlTable dependencyTable = getTable(table, DEPENDENCIES, false, errors);
+        Set<TomlKey> depKeys = dependencyTable == null ? Collections.emptySet() : dependencyTable.keys();
         Map<String, IVersionConstraint> dependencies = new HashMap<>();
-        for (Map.Entry<String, String> entry : dependencyStrings.entrySet()) {
-            String depId = entry.getKey();
+        for (TomlKey depKey : depKeys) {
+            String depId = depKey.toString();
             if (!VALID_ID_PATTERN.matcher(depId).matches()) {
-                errors.addError("Dependency module id '" + depId + "' is invalid. Must match [a-z0-9_]+.");
+                errors.addError("Invalid dependency module id: '" + depId + "'. Must match [a-z0-9_]+.");
+                continue;
             }
+            String depVersion = getString(dependencyTable, depKey, false, errors);
+            if (depVersion == null) continue;
 
             try {
-                IVersionConstraint constraint = SemVer.ConstraintSet.parse(entry.getValue());
-                dependencies.put(depId, constraint);
+                dependencies.put(depId, SemVer.ConstraintSet.parse(depVersion));
             } catch (InvalidVersionConstraintException e) {
                 errors.addError(e);
             }
@@ -136,67 +150,65 @@ public final class ModuleConfig {
             throw errors.build();
         }
 
-        return new ModuleEntry(id, version, entrypoint, name, description,
-                authors, source, license, icon, dependencies);
+        Path icon = FileUtilImpl.resolve(root, Objects.requireNonNull(iconString));
+
+        return new ModuleEntry(
+                id, version, entrypoint, name, description, authors, source, license, icon, dependencies
+        );
     }
 
-    private static Long getLong(TomlTable table, String key, ModuleLoadException.Builder errors, boolean required) {
-        return getValue(table, key, Long.class, errors, required);
+    private static <T> T required(TomlKey key, ModuleLoadException.Builder errors) {
+        errors.addError("Missing required field: '" + key + "'");
+        return null;
     }
 
-    private static String getString(TomlTable table, String key, ModuleLoadException.Builder errors, boolean required) {
-        return getValue(table, key, String.class, errors, required);
+    private static <T> T expected(TomlKey key, String type, ModuleLoadException.Builder errors) {
+        errors.addError("Expected " + type + " value for key: '" + key + "'");
+        return null;
     }
 
-    private static List<String> getStringList(TomlTable table, String key, ModuleLoadException.Builder errors, boolean required) {
-        return getList(table, key, String.class, errors, required);
+    private static <T> T expectedArr(TomlKey key, int index, String type, ModuleLoadException.Builder errors) {
+        errors.addError("Expected " + type + " value at index " + index + " for key: '" + key + "'");
+        return null;
     }
 
-    private static Map<String, String> getStringMap(TomlTable table, String key, ModuleLoadException.Builder errors, boolean required) {
-        return getMap(table, key, String.class, errors, required);
+    private static Long getLong(TomlTable table, TomlKey key, boolean required, ModuleLoadException.Builder errors) {
+        TomlValue value = table.get(key);
+        if (value == null) return required ? required(key, errors) : null;
+        if (!value.isPrimitive() || !value.asPrimitive().isInteger()) return expected(key, "integer", errors);
+        return value.asPrimitive().asLong();
     }
 
-    private static <T> T getValue(TomlTable table, String key, Class<T> type, ModuleLoadException.Builder errors, boolean required) {
-        Object value = table.get(Collections.singletonList(key));
-        if (value == null) {
-            if (required) errors.addError("Missing required field: '" + key + "'");
-            return null;
+    private static String getString(TomlTable table, TomlKey key, boolean required, ModuleLoadException.Builder errors) {
+        TomlValue value = table.get(key);
+        if (value == null) return required ? required(key, errors) : null;
+        if (!value.isPrimitive() || !value.asPrimitive().isString()) return expected(key, "string", errors);
+        return value.asPrimitive().asString();
+    }
+
+    private static List<String> getStringArray(TomlTable table, TomlKey key, boolean required, ModuleLoadException.Builder errors) {
+        TomlValue value = table.get(key);
+        if (value == null) return required ? required(key, errors) : null;
+        if (!value.isArray()) return expected(key, "string array", errors);
+
+        TomlArray tomlArray = value.asArray();
+        List<String> list = new ArrayList<>(tomlArray.size());
+        boolean error = false;
+        for (int i = 0; i < tomlArray.size(); i++) {
+            TomlValue tomlValue = tomlArray.get(i);
+            if (!tomlValue.isPrimitive() || !value.asPrimitive().isString()) {
+                expectedArr(key, i, "string", errors);
+                error = true;
+            } else list.add(tomlValue.asPrimitive().asString());
         }
-        if (type.isInstance(value)) {
-            return type.cast(value);
-        } else {
-            errors.addError("Field '" + key + "' is not of type " + type.getSimpleName());
-            return null;
-        }
+
+        return error ? null : list;
     }
 
-    private static <T> List<T> getList(TomlTable table, String key, Class<T> elementType, ModuleLoadException.Builder errors, boolean required) {
-        TomlArray array = getValue(table, key, TomlArray.class, errors, required);
-        if (array == null) return List.of();
-        List<T> list = new ArrayList<>();
-        for (int i = 0; i < array.size(); i++) {
-            Object item = array.get(i);
-            if (elementType.isInstance(item)) {
-                list.add(elementType.cast(item));
-            } else {
-                errors.addError("Field '" + key + "' array item " + i + " is not of type " + elementType.getSimpleName());
-            }
-        }
-        return list;
-    }
-
-    private static <T> Map<String, T> getMap(TomlTable table, String key, Class<T> valueType, ModuleLoadException.Builder errors, boolean required) {
-        TomlTable tomlTable = getValue(table, key, TomlTable.class, errors, required);
-        if (tomlTable == null) return Map.of();
-        Map<String, T> map = new HashMap<>();
-        for (String tableKey : tomlTable.keySet()) {
-            Object version = tomlTable.get(tableKey);
-            if (valueType.isInstance(version)) {
-                map.put(tableKey, valueType.cast(version));
-            } else {
-                errors.addError("Map value for key '" + tableKey + "' is not of type " + valueType.getSimpleName());
-            }
-        }
-        return map;
+    private static TomlTable getTable(TomlTable table, TomlKey key, boolean required, ModuleLoadException.Builder errors) {
+        TomlValue value = table.get(key);
+        if (value == null) return required ? required(key, errors) : null;
+        if (!value.isTable()) return expected(key, "table", errors);
+        return value.asTable();
     }
 }

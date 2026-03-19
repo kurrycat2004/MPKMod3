@@ -8,8 +8,8 @@ jackson = "2.15.0-rc1"
 javapoet = "1.13.0"
 jetbrains-annotations = "24.1.0"
 joml = "1.10.8"
+jtoml = "1.5.2"
 jvmdowngrader = "1.4.0-SNAPSHOT"
-tomlj = "1.1.1"
 unimined = "1.4.2-SNAPSHOT"
 shadow = "9.0.0-beta12"
 
@@ -32,9 +32,9 @@ commons-compress = { module = "org.apache.commons:commons-compress", version.ref
 javapoet = { module = "com.squareup:javapoet", version.ref = "javapoet" }
 jetbrains-annotations = { module = "org.jetbrains:annotations", version.ref = "jetbrains-annotations" }
 joml = { module = "org.joml:joml", version.ref = "joml" }
+jtoml = { module = "io.github.wasabithumb:jtoml", version.ref = "jtoml" }
 jvmdowngrader = { module = "xyz.wagyourtail.jvmdowngrader:jvmdowngrader", version.ref = "jvmdowngrader" }
 shadow-gradle-plugin = { module = "com.gradleup.shadow:shadow-gradle-plugin", version.ref = "shadow" }
-tomlj = { module = "org.tomlj:tomlj", version.ref = "tomlj" }
 
 comp-log4j-api = { module = "org.apache.logging.log4j:log4j-api", version.ref = "comp-log-log4j" }
 comp-slf4j-api = { module = "org.slf4j:slf4j-api", version.ref = "comp-log-slf4j" }
