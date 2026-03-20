@@ -1,14 +1,14 @@
 package io.github.kurrycat.mpkmod.module;
 
 import com.google.auto.service.AutoService;
-import io.github.kurrycat.mpkmod.api.ModPlatform;
+import io.github.kurrycat.mpkmod.api.minecraft.ModPlatform;
 import io.github.kurrycat.mpkmod.api.log.ILogger;
 import io.github.kurrycat.mpkmod.api.module.IModule;
 import io.github.kurrycat.mpkmod.api.module.IVersionConstraint;
 import io.github.kurrycat.mpkmod.api.module.ModuleRegistry;
 import io.github.kurrycat.mpkmod.api.service.StandardServiceProvider;
 import io.github.kurrycat.mpkmod.api.service.ServiceProvider;
-import io.github.kurrycat.mpkmod.util.FileUtilImpl;
+import io.github.kurrycat.mpkmod.util.FileUtil;
 import io.github.kurrycat.mpkmod.util.MultiParentClassLoader;
 import io.github.kurrycat.mpkmod.util.StringUtil;
 import io.github.kurrycat.mpkmod.util.TarjanSCC;
@@ -187,7 +187,7 @@ public final class ModuleRegistryImpl implements ModuleRegistry {
 
     private static LoadedModule loadModule(Map<String, LoadedModule> loadedModules, DiscoveredModule module) throws ModuleLoadException {
         CachedModule cachedModule = ModuleCache.getOrCreateCachedModule(module);
-        FileUtilImpl.tryCloseJar(module.source());
+        FileUtil.tryCloseJar(module.source());
 
         try {
             List<ClassLoader> dependencyClassLoaders = new ArrayList<>();

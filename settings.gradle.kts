@@ -29,9 +29,10 @@ dependencyResolutionManagement {
 include("inject-tags")
 include("common-api")
 
-include("common-dep-impl:core")
-include("common-dep-impl:log")
-include("common-dep-impl:lwjgl")
+include("service-providers:log")
+include("service-providers:lwjgl")
+include("service-providers:transformer")
+include("service-providers:entrypoint:transformer")
 
 include("common-impl")
 

@@ -78,3 +78,10 @@ tasks.named("compileJava") {
 tasks.named("sourcesJar") {
     dependsOn(injectTags)
 }
+
+dependencies {
+    compileOnly(libs.auto.service.annotations)
+    annotationProcessor(libs.auto.service)
+
+    compileOnly(projects.commonApi)
+}

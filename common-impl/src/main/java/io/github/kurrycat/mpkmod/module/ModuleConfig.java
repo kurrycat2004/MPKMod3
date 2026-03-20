@@ -3,7 +3,7 @@ package io.github.kurrycat.mpkmod.module;
 import io.github.kurrycat.mpkmod.api.module.IVersion;
 import io.github.kurrycat.mpkmod.api.module.IVersionConstraint;
 import io.github.kurrycat.mpkmod.api.module.InvalidVersionConstraintException;
-import io.github.kurrycat.mpkmod.util.FileUtilImpl;
+import io.github.kurrycat.mpkmod.util.FileUtil;
 import io.github.wasabithumb.jtoml.JToml;
 import io.github.wasabithumb.jtoml.document.TomlDocument;
 import io.github.wasabithumb.jtoml.except.TomlException;
@@ -64,7 +64,7 @@ public final class ModuleConfig {
     }
 
     public static List<ModuleEntry> load(Path root) throws ModuleLoadException {
-        Path modulesDir = FileUtilImpl.resolve(root, MODULES_DIR);
+        Path modulesDir = FileUtil.resolve(root, MODULES_DIR);
         if (!Files.isDirectory(modulesDir)) return List.of();
         try (DirectoryStream<Path> stream = Files.newDirectoryStream(modulesDir)) {
             List<ModuleEntry> modules = new ArrayList<>();
@@ -150,7 +150,7 @@ public final class ModuleConfig {
             throw errors.build();
         }
 
-        Path icon = FileUtilImpl.resolve(root, Objects.requireNonNull(iconString));
+        Path icon = FileUtil.resolve(root, Objects.requireNonNull(iconString));
 
         return new ModuleEntry(
                 id, version, entrypoint, name, description, authors, source, license, icon, dependencies

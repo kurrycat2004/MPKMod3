@@ -10,6 +10,5 @@ dependencies {
     compileOnly(libs.jtoml.serializer.reflect)
     compileOnly(libs.jvmdowngrader)
 
-    compileOnly(projects.injectTags)
     compileOnly(projects.commonApi)
 }

@@ -1,6 +1,6 @@
 package io.github.kurrycat.mpkmod.log;
 
-import io.github.kurrycat.mpkmod.Tags;
+import io.github.kurrycat.mpkmod.api.App;
 import io.github.kurrycat.mpkmod.api.log.ILogger;
 
 import java.io.PrintWriter;
@@ -9,7 +9,7 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 
 public record StdoutLogger(String name) implements ILogger {
-    public static final StdoutLogger FALLBACK = new StdoutLogger(Tags.MOD_ID);
+    public static final StdoutLogger FALLBACK = new StdoutLogger(App.id());
 
     private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm:ss");
 
@@ -28,16 +28,16 @@ public record StdoutLogger(String name) implements ILogger {
         if (var1 instanceof Throwable t) {
             print(level, formatString, t);
         } else {
-            print(level, formatStringWithArgs(formatString, new Object[]{var1}, 1), null);
+            print(level, formatStringWithArgs(formatString, new Object[] { var1 }, 1), null);
         }
     }
 
     @Override
     public void log(Level level, String formatString, Object var1, Object var2) {
         if (var2 instanceof Throwable t) {
-            print(level, formatStringWithArgs(formatString, new Object[]{var1}, 1), t);
+            print(level, formatStringWithArgs(formatString, new Object[] { var1 }, 1), t);
         } else {
-            print(level, formatStringWithArgs(formatString, new Object[]{var1, var2}, 2), null);
+            print(level, formatStringWithArgs(formatString, new Object[] { var1, var2 }, 2), null);
         }
     }
 

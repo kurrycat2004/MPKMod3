@@ -1,5 +1,9 @@
 package io.github.kurrycat.mpkmod.api.log;
 
+import io.github.kurrycat.mpkmod.api.App;
+import io.github.kurrycat.mpkmod.api.service.ServiceHandle;
+import io.github.kurrycat.mpkmod.api.service.Services;
+
 public interface ILogger {
     enum Level {
         TRACE,
@@ -27,15 +31,23 @@ public interface ILogger {
         }
     }
 
+    class LogManagerHolder {
+        private static final ServiceHandle<LogManager> HANDLE = Services.getHandle(LogManager.class);
+    }
+
+    static ILogger createLogger(String name) {
+        return LogManagerHolder.HANDLE.get().createLogger(App.id() + "/" + name);
+    }
+
+    default ILogger createSubLogger(String name) {
+        return LogManagerHolder.HANDLE.get().createLogger(this.name() + "/" + name);
+    }
+
     default FixedLevel createFixed(Level level) {
         return new FixedLevel(this, level);
     }
 
     String name();
-
-    default ILogger createSubLogger(String name) {
-        return LogManager.HANDLE.get().createLogger(this.name() + "/" + name);
-    }
 
     void log(Level level, String formatString);
 

@@ -1,7 +1,7 @@
 package io.github.kurrycat.mpkmod.module;
 
-import io.github.kurrycat.mpkmod.api.ModPlatform;
-import io.github.kurrycat.mpkmod.util.FileUtilImpl;
+import io.github.kurrycat.mpkmod.api.minecraft.ModPlatform;
+import io.github.kurrycat.mpkmod.util.FileUtil;
 
 import java.io.IOException;
 import java.nio.file.DirectoryStream;
@@ -16,7 +16,7 @@ public final class ModuleCache {
     private static final String MODULES_DIR = "mpkmodules";
 
     public static void extractInternalModules() {
-        Path internalModDir = ModPlatform.HANDLE.get().fileEnv().findPath(MODULES_DIR);
+        Path internalModDir = FileUtil.findPath(ModPlatform.HANDLE.get().rootPaths(), MODULES_DIR);
         if (internalModDir == null) {
             ModuleRegistryImpl.LOGGER.info("No internal modules found, skipping extraction");
             return;
@@ -27,7 +27,7 @@ public final class ModuleCache {
                 if (!Files.isRegularFile(path) || !path.toString().endsWith(".jar")) {
                     continue;
                 }
-                Path targetPath = FileUtilImpl.resolve(internalModuleDir, path.getFileName());
+                Path targetPath = FileUtil.resolve(internalModuleDir, path.getFileName());
                 Files.copy(path, targetPath, StandardCopyOption.REPLACE_EXISTING);
             }
         } catch (Exception e) {
@@ -39,13 +39,13 @@ public final class ModuleCache {
         Path source = module.source();
         String sourceHash = module.sourceHash();
 
-        Path cachedPath = FileUtilImpl.resolve(getCache(), source.getFileName());
+        Path cachedPath = FileUtil.resolve(getCache(), source.getFileName());
         if (!Files.exists(cachedPath)) {
             return writeCachedModule(source, cachedPath, module);
         }
 
         try {
-            String hash = FileUtilImpl.getOrCreateSha256Sum(cachedPath);
+            String hash = FileUtil.getOrCreateSha256Sum(cachedPath);
             if (hash.equals(sourceHash)) return new CachedModule(cachedPath, sourceHash, module.entry());
         } catch (IOException e) {
             return writeCachedModule(source, cachedPath, module);
@@ -56,7 +56,7 @@ public final class ModuleCache {
     private static CachedModule writeCachedModule(Path source, Path cachedPath, DiscoveredModule module) throws ModuleLoadException {
         try {
             Files.copy(source, cachedPath, StandardCopyOption.REPLACE_EXISTING);
-            String hash = FileUtilImpl.createSha256Sum(cachedPath);
+            String hash = FileUtil.createSha256Sum(cachedPath);
             if (!hash.equals(module.sourceHash())) {
                 throw new ModuleLoadException("Module hash mismatch after copying: " + source);
             }
@@ -67,19 +67,18 @@ public final class ModuleCache {
     }
 
     public static Path getModulesDir() {
-        Path gamePath = ModPlatform.HANDLE.get().fileEnv().gamePath();
-        return FileUtilImpl.resolve(gamePath, MODULES_DIR);
+        return FileUtil.resolve(ModPlatform.HANDLE.get().gamePath(), MODULES_DIR);
     }
 
     public static Path getInternalModuleDir() {
-        return FileUtilImpl.createHiddenDir(
-                FileUtilImpl.resolve(getModulesDir(), INTERNAL_MODULE_DIR)
+        return FileUtil.createHiddenDir(
+                FileUtil.resolve(getModulesDir(), INTERNAL_MODULE_DIR)
         );
     }
 
     public static Path getCache() {
-        return FileUtilImpl.createHiddenDir(
-                FileUtilImpl.resolve(getModulesDir(), MODULE_CACHE_DIR)
+        return FileUtil.createHiddenDir(
+                FileUtil.resolve(getModulesDir(), MODULE_CACHE_DIR)
         );
     }
 }

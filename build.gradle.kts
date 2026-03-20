@@ -9,9 +9,10 @@ val components: List<DelegatingProjectDependency> = listOf(
     projects.injectTags,
     projects.commonApi,
     projects.commonImpl,
-    projects.commonDepImpl.core,
-    projects.commonDepImpl.log,
-    projects.commonDepImpl.lwjgl,
+    projects.serviceProviders.log,
+    projects.serviceProviders.lwjgl,
+    //projects.serviceProviders.transformer,
+    projects.serviceProviders.entrypoint.transformer,
     projects.modules.main
 )
 

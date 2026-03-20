@@ -1,6 +1,6 @@
 package io.github.kurrycat.mpkmod.api.resource;
 
-import io.github.kurrycat.mpkmod.api.ModPlatform;
+import io.github.kurrycat.mpkmod.api.App;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -22,7 +22,7 @@ public interface IResource {
     }
 
     static IResource ofSelf(String path) {
-        return ResourceManager.HANDLE.get().resource(ModPlatform.HANDLE.get().modInfo().modId(), path);
+        return ResourceManager.HANDLE.get().resource(App.id(), path);
     }
 
     default String readUtf8() throws IOException {

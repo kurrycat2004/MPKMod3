@@ -1,9 +1,7 @@
 package io.github.kurrycat.mpkmod.service;
 
 import com.google.auto.service.AutoService;
-import io.github.kurrycat.mpkmod.Tags;
 import io.github.kurrycat.mpkmod.api.log.ILogger;
-import io.github.kurrycat.mpkmod.api.log.LogManager;
 import io.github.kurrycat.mpkmod.api.service.ServiceHandle;
 import io.github.kurrycat.mpkmod.api.service.ServiceManager;
 import io.github.kurrycat.mpkmod.api.service.ServiceProvider;
@@ -37,7 +35,9 @@ public final class ServiceManagerImpl implements ServiceManager {
     };
 
     public ServiceManagerImpl() {
-        LOGGER = StdoutLogger.FALLBACK.createSubLogger("service").createFixed(LOG_LEVEL);
+        LOGGER = StdoutLogger.FALLBACK
+                .createSubLogger(ServiceManager.class.getSimpleName())
+                .createFixed(LOG_LEVEL);
         LOGGER.log("Initialized service manager using class loader: {}",
                 ServiceManagerImpl.class.getClassLoader());
 
@@ -51,14 +51,13 @@ public final class ServiceManagerImpl implements ServiceManager {
         }
         this.cache = new HashMap<>();
         for (Map.Entry<Class<?>, List<ServiceProvider>> entry : cache.entrySet()) {
-            Class<?> providerClass = entry.getKey();
             List<ServiceProvider> providers = entry.getValue();
 
             List<ServiceProviderWrapper> wrappedProviders = new ArrayList<>(providers.size());
             for (int i = 0; i < providers.size(); i++) {
                 wrappedProviders.add(new ServiceProviderWrapper(providers.get(i), i));
             }
-            this.cache.put(providerClass, Collections.unmodifiableList(wrappedProviders));
+            this.cache.put(entry.getKey(), Collections.unmodifiableList(wrappedProviders));
         }
     }
 
@@ -66,10 +65,7 @@ public final class ServiceManagerImpl implements ServiceManager {
     public void initialize() {
         if (initialized) return;
         LOGGER.log("Initializing logger service...");
-        LOGGER = LogManager.HANDLE.get()
-                .createLogger(Tags.MOD_ID)
-                .createSubLogger("service")
-                .createFixed(LOG_LEVEL);
+        LOGGER = ILogger.createLogger(ServiceManager.class.getSimpleName()).createFixed(LOG_LEVEL);
         if (LOGGER.parentLogger() instanceof StdoutLogger) {
             LOGGER.log("Failed to initialize logger service, continuing with fallback logger");
         } else {
@@ -104,8 +100,7 @@ public final class ServiceManagerImpl implements ServiceManager {
 
         Optional<String> reason = provider.invalidReason();
         if (reason.isPresent()) {
-            throw new IllegalStateException("Failed to switch to service provider " +
-                                            provider.name() + ": " + reason.get());
+            throw new IllegalArgumentException("Failed to switch to service provider " + provider.name() + ": " + reason.get());
         }
 
         LOGGER.log("Switching service {} from {} to provider {}",
@@ -124,7 +119,7 @@ public final class ServiceManagerImpl implements ServiceManager {
         if (providers == null || providers.isEmpty()) {
             String message = "No service provider found for " + serviceClass.getName();
             LOGGER.log(message);
-            throw new IllegalStateException(message);
+            throw new IllegalArgumentException(message);
         }
         LOGGER.log("Found {} potential provider(s):", providers.size());
         for (ServiceProvider provider : providers) {
@@ -158,6 +153,6 @@ public final class ServiceManagerImpl implements ServiceManager {
             }
         }
 
-        throw new IllegalStateException(sb.toString());
+        throw new IllegalArgumentException(sb.toString());
     }
 }

@@ -1,6 +1,6 @@
 package io.github.kurrycat.mpkmod.module;
 
-import io.github.kurrycat.mpkmod.api.util.FileUtil;
+import io.github.kurrycat.mpkmod.util.FileUtil;
 
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
@@ -21,7 +21,7 @@ public final class ModuleDiscoverer {
 
     public static void discoverModules(Path source, List<DiscoveredModule> modules) {
         try {
-            Path root = FileUtil.HANDLE.get().getRootPath(source);
+            Path root = FileUtil.getRootPath(source);
             List<ModuleEntry> entries = ModuleConfig.load(root);
             for (ModuleEntry entry : entries) {
                 modules.add(DiscoveredModule.fromEntry(source, entry));
