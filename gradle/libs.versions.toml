@@ -33,6 +33,7 @@ javapoet = { module = "com.squareup:javapoet", version.ref = "javapoet" }
 jetbrains-annotations = { module = "org.jetbrains:annotations", version.ref = "jetbrains-annotations" }
 joml = { module = "org.joml:joml", version.ref = "joml" }
 jtoml = { module = "io.github.wasabithumb:jtoml", version.ref = "jtoml" }
+jtoml-serializer-reflect = { module = "io.github.wasabithumb:jtoml-serializer-reflect", version.ref = "jtoml" }
 jvmdowngrader = { module = "xyz.wagyourtail.jvmdowngrader:jvmdowngrader", version.ref = "jvmdowngrader" }
 shadow-gradle-plugin = { module = "com.gradleup.shadow:shadow-gradle-plugin", version.ref = "shadow" }
 
