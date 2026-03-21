@@ -2,7 +2,6 @@ package io.github.kurrycat.mpkmod.api.minecraft;
 
 import io.github.kurrycat.mpkmod.api.App;
 import io.github.kurrycat.mpkmod.api.log.ILogger;
-import io.github.kurrycat.mpkmod.api.log.LogManager;
 import io.github.kurrycat.mpkmod.api.module.ModuleRegistry;
 import io.github.kurrycat.mpkmod.api.service.ServiceHandle;
 import io.github.kurrycat.mpkmod.api.service.Services;

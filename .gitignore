@@ -19,5 +19,4 @@ build
 
 # other
 eclipse
-runs
-versions/*/run
+runs/*/run

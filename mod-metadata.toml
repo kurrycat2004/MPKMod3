@@ -1,0 +1,10 @@
+id = "mpkmod"
+name = "MPKMod"
+group = "io.github.kurrycat.mpkmod"
+version = "3.0.0"
+description = "A Mod that adds some features that help parkour to the game."
+license = "LGPL-3.0"
+authors = ["kurrycat"]
+homepage = "https://github.com/kurrycat2004/MPKMod3"
+sources = "https://github.com/kurrycat2004/MPKMod3"
+issues = "https://github.com/kurrycat2004/MPKMod3/issues"

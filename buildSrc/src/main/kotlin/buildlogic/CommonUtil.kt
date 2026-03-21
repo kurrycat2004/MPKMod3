@@ -1,10 +1,10 @@
 package buildlogic
 
+import groovy.json.JsonOutput
 import org.gradle.api.Project
 import org.gradle.api.initialization.Settings
 import org.gradle.api.provider.ProviderFactory
 import org.gradle.api.tasks.SourceSet
-import org.gradle.api.tasks.SourceSetContainer
 import org.gradle.kotlin.dsl.DependencyHandlerScope
 
 fun prop(providers: ProviderFactory, propertyName: String) =
@@ -21,3 +21,6 @@ fun SourceSet.compileOnly(dependencies: DependencyHandlerScope, vararg deps: Any
 fun SourceSet.annotationProcessor(dependencies: DependencyHandlerScope, vararg deps: Any) {
     deps.forEach { dependencies.add(annotationProcessorConfigurationName, it) }
 }
+
+fun <K, V> json(vararg pairs: Pair<K, V>): String =
+    JsonOutput.prettyPrint(JsonOutput.toJson(mapOf(*pairs)))

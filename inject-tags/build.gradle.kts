@@ -1,21 +1,13 @@
-import buildlogic.prop
+import buildlogic.ModMetadata
 
 plugins {
     id("jar-defaults-conventions")
 }
 
 abstract class InjectTagsTask : DefaultTask() {
-    @get:Input
-    abstract val modGroup: Property<String>
-
-    @get:Input
-    abstract val modId: Property<String>
-
-    @get:Input
-    abstract val modName: Property<String>
-
-    @get:Input
-    abstract val modVersion: Property<String>
+    @get:InputFile
+    @get:PathSensitive(PathSensitivity.RELATIVE)
+    abstract val metadataFile: RegularFileProperty
 
     @get:OutputDirectory
     abstract val outputDir: DirectoryProperty
@@ -25,27 +17,28 @@ abstract class InjectTagsTask : DefaultTask() {
         fun escapeJava(value: String): String =
             value.replace("\\", "\\\\").replace("\"", "\\\"")
 
-        val packageName = modGroup.get()
+        val meta = ModMetadata.read(metadataFile.get().asFile.toPath())
+
         val className = "Tags"
 
         val outFile = outputDir.get().asFile
-            .resolve(packageName.replace('.', '/'))
+            .resolve(meta.group.replace('.', '/'))
             .resolve("$className.java")
 
         outFile.parentFile.mkdirs()
 
         outFile.writeText(
             """
-            package $packageName;
+            package ${meta.group};
 
             /** Auto-generated tags class - DO NOT MODIFY */
             public final class $className {
                 private $className() {}
 
-                public static final String MOD_ID = "${escapeJava(modId.get())}";
-                public static final String MOD_NAME = "${escapeJava(modName.get())}";
-                public static final String MOD_GROUP = "${escapeJava(modGroup.get())}";
-                public static final String MOD_VERSION = "${escapeJava(modVersion.get())}";
+                public static final String MOD_ID = "${escapeJava(meta.id)}";
+                public static final String MOD_NAME = "${escapeJava(meta.name)}";
+                public static final String MOD_GROUP = "${escapeJava(meta.group)}";
+                public static final String MOD_VERSION = "${escapeJava(meta.version)}";
             }
             """.trimIndent() + "\n"
         )
@@ -57,25 +50,19 @@ val generatedTagsDir = layout.buildDirectory.dir("generated/sources/injectTags")
 val injectTags by tasks.registering(InjectTagsTask::class) {
     group = "build"
     description = "Generates the Tags.java class"
-
-    modGroup.set(prop("modGroup"))
-    modId.set(prop("modId"))
-    modName.set(prop("modName"))
-    modVersion.set(prop("modVersion"))
+    metadataFile.set(rootProject.layout.projectDirectory.file("mod-metadata.toml"))
     outputDir.set(generatedTagsDir)
 }
 
-sourceSets {
-    named("main") {
-        java.srcDir(generatedTagsDir)
-    }
+sourceSets.main {
+    java.srcDir(generatedTagsDir)
 }
 
-tasks.named("compileJava") {
+tasks.compileJava {
     dependsOn(injectTags)
 }
 
-tasks.named("sourcesJar") {
+tasks.sourcesJar {
     dependsOn(injectTags)
 }
 

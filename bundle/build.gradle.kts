@@ -13,9 +13,11 @@ val components: List<DelegatingProjectDependency> = listOf(
     projects.serviceProviders.lwjgl,
     //projects.serviceProviders.transformer,
     projects.serviceProviders.entrypoint.transformer,
+    projects.serviceProviders.entrypoint.loader,
     projects.modules.main
 )
 
+components.forEach { evaluationDependsOn(it.path) }
 val componentProjects = components.map { it.path }.map(::project)
 
 val mergeServiceFiles by tasks.registering(MergeServiceFilesTask::class) {

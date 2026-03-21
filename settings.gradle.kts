@@ -6,6 +6,10 @@ pluginManagement {
         mavenLocal()
         mavenCentral()
         gradlePluginPortal()
+        maven("https://maven.fabricmc.net/")
+        maven("https://files.minecraftforge.net/maven")
+        maven("https://maven.wagyourtail.xyz/releases")
+        maven("https://maven.wagyourtail.xyz/snapshots")
     }
 }
 
@@ -16,7 +20,7 @@ dependencyResolutionManagement {
         mavenCentral()
         gradlePluginPortal()
         maven("https://files.minecraftforge.net/maven")
-        //maven("https://maven.fabricmc.net/")
+        maven("https://maven.fabricmc.net/")
         maven("https://maven.legacyfabric.net")
         //maven("https://maven.minecraftforge.net/")
         //maven("https://maven.neoforged.net/releases/")
@@ -33,7 +37,12 @@ include("service-providers:log")
 include("service-providers:lwjgl")
 include("service-providers:transformer")
 include("service-providers:entrypoint:transformer")
+include("service-providers:entrypoint:loader")
 
 include("common-impl")
 
 include("modules:main")
+
+include("bundle")
+
+include("runs:fabric")

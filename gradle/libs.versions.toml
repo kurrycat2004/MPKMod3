@@ -4,6 +4,8 @@ auto-service = "1.1.1"
 discordGameSdk = "v1.0.0"
 commons-compress = "1.28.0"
 fastutil = "8.5.15"
+fabric-loader = "0.18.4"
+fabric-loom = "1.15-SNAPSHOT"
 jackson = "2.15.0-rc1"
 javapoet = "1.13.0"
 jetbrains-annotations = "24.1.0"
@@ -29,6 +31,7 @@ asm = { module = "org.ow2.asm:asm", version.ref = "asm" }
 asm-tree = { module = "org.ow2.asm:asm-tree", version.ref = "asm" }
 asm-commons = { module = "org.ow2.asm:asm-commons", version.ref = "asm" }
 commons-compress = { module = "org.apache.commons:commons-compress", version.ref = "commons-compress" }
+fabric-loader = { module = "net.fabricmc:fabric-loader", version.ref = "fabric-loader" }
 javapoet = { module = "com.squareup:javapoet", version.ref = "javapoet" }
 jetbrains-annotations = { module = "org.jetbrains:annotations", version.ref = "jetbrains-annotations" }
 joml = { module = "org.joml:joml", version.ref = "joml" }
@@ -68,5 +71,6 @@ comp-core-asm5 = [
 ]
 
 [plugins]
-unimined = { id = "xyz.wagyourtail.unimined", version.ref = "unimined" }
+fabric-loom = { id = "net.fabricmc.fabric-loom", version.ref = "fabric-loom" }
+fabric-loom-remap = { id = "net.fabricmc.fabric-loom-remap", version.ref = "fabric-loom" }
 jvmdowngrader = { id = "xyz.wagyourtail.jvmdowngrader", version.ref = "jvmdowngrader" }
