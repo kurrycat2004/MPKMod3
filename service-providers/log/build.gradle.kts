@@ -18,8 +18,8 @@ dependencies {
         it.compileOnly(this, libs.auto.service.annotations)
         it.annotationProcessor(this, libs.auto.service)
     }
-    log4j.compileOnly(this, libs.comp.log4j.api)
-    slf4j.compileOnly(this, libs.comp.slf4j.api)
+    log4j.compileOnly(this, libs.log4j.api)
+    slf4j.compileOnly(this, libs.slf4j.api)
 }
 
 val mergeServiceFiles by tasks.registering(MergeServiceFilesTask::class) {

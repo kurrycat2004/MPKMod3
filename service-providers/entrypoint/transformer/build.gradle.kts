@@ -15,15 +15,15 @@ val variants = listOf(fml, mixin, modlauncher)
 dependencies {
     variants.forEach { it.compileOnly(this, projects.commonApi) }
 
-    fml.compileOnly(this, libs.bundles.comp.core.asm4)
+    fml.compileOnly(this, libs.bundles.asm4)
 
-    mixin.compileOnly(this, libs.comp.core.mixin)
-    mixin.compileOnly(this, libs.bundles.comp.core.asm5)
+    mixin.compileOnly(this, libs.mixin)
+    mixin.compileOnly(this, libs.bundles.asm5)
 
     modlauncher.compileOnly(this, libs.auto.service.annotations)
     modlauncher.annotationProcessor(this, libs.auto.service)
-    modlauncher.compileOnly(this, libs.comp.core.modlauncher)
-    modlauncher.compileOnly(this, libs.bundles.comp.core.asm4)
+    modlauncher.compileOnly(this, libs.modlauncher)
+    modlauncher.compileOnly(this, libs.bundles.asm4)
 }
 
 tasks.jar {

@@ -14,7 +14,7 @@ dependencies {
         it.compileOnly(
             this,
             projects.commonApi,
-            libs.bundles.comp.core.asm4,
+            libs.bundles.asm4,
             libs.auto.service.annotations
         )
         it.annotationProcessor(this, libs.auto.service)

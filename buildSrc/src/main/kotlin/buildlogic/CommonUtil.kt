@@ -2,16 +2,12 @@ package buildlogic
 
 import groovy.json.JsonOutput
 import org.gradle.api.Project
-import org.gradle.api.initialization.Settings
-import org.gradle.api.provider.ProviderFactory
+import org.gradle.api.Task
 import org.gradle.api.tasks.SourceSet
+import org.gradle.api.tasks.TaskProvider
+import org.gradle.api.tasks.bundling.Jar
 import org.gradle.kotlin.dsl.DependencyHandlerScope
-
-fun prop(providers: ProviderFactory, propertyName: String) =
-    providers.gradleProperty(propertyName).orNull ?: error("Property $propertyName not found in gradle.properties")
-
-fun Project.prop(propertyName: String): String = prop(providers, propertyName)
-fun Settings.prop(propertyName: String): String = prop(providers, propertyName)
+import org.gradle.kotlin.dsl.named
 
 // TODO: Use -Xcontext-parameters
 fun SourceSet.compileOnly(dependencies: DependencyHandlerScope, vararg deps: Any) {
@@ -22,5 +18,12 @@ fun SourceSet.annotationProcessor(dependencies: DependencyHandlerScope, vararg d
     deps.forEach { dependencies.add(annotationProcessorConfigurationName, it) }
 }
 
+
 fun <K, V> json(vararg pairs: Pair<K, V>): String =
     JsonOutput.prettyPrint(JsonOutput.toJson(mapOf(*pairs)))
+
+inline fun <reified T : Task> tasks(projects: List<Project>, name: String) =
+    projects.map { it.tasks.named<T>(name) }
+
+fun jars(jarTasks: List<TaskProvider<Jar>>) =
+    jarTasks.map { it.flatMap(Jar::getArchiveFile) }

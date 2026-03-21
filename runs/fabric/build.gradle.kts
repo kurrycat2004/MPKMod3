@@ -16,7 +16,11 @@ dependencies {
 }
 
 loom {
-
+    runs {
+        named("client") {
+            vmArgs("-Dmpkmod.module.enableModuleLoadStacktrace=true")
+        }
+    }
 }
 
 java {

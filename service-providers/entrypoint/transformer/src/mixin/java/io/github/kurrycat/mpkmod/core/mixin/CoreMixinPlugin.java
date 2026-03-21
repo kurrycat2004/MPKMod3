@@ -30,20 +30,31 @@ public final class CoreMixinPlugin implements IMixinConfigPlugin {
 
             List<?> coprocessors = getCoProcessorList(classLoader);
 
-            Method tryTransformMethod = TransformerManager.class.getMethod("tryTransform", String.class, ClassNode.class);
+            Method tryTransformMethod = getClass().getMethod("tryTransform", String.class, ClassNode.class);
             MethodHandle tryTransformHandle = MethodHandles.publicLookup().unreflect(tryTransformMethod);
+
+            Method shouldTransformMethod = getClass().getMethod("shouldTransform", String.class);
+            MethodHandle shouldTransformHandle = MethodHandles.publicLookup().unreflect(shouldTransformMethod);
 
             Class<?> coreCoProcClass = generateCoProcClass(classLoader);
 
             Object coreCoProcessor = coreCoProcClass
-                    .getConstructor(MethodHandle.class)
-                    .newInstance(tryTransformHandle);
+                    .getConstructor(MethodHandle.class, MethodHandle.class)
+                    .newInstance(tryTransformHandle, shouldTransformHandle);
             injectIntoCoprocessorList(coprocessors, coreCoProcClass, coreCoProcessor);
 
             transformerManager.tryInitialize(IMixinConfigPlugin.class.getSimpleName());
         } catch (ReflectiveOperationException | ClassCastException e) {
             LOGGER.error("Failed to initialize core mixin plugin", e);
         }
+    }
+
+    public static boolean tryTransform(String className, ClassNode input) {
+        return TransformerManager.HANDLE.get().tryTransform(className, input);
+    }
+
+    public static boolean shouldTransform(String className) {
+        return TransformerManager.HANDLE.get().shouldTransform(className);
     }
 
     @SuppressWarnings("unchecked")

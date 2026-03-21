@@ -1,13 +1,12 @@
 package io.github.kurrycat.mpkmod.module;
 
 import com.google.auto.service.AutoService;
-import io.github.kurrycat.mpkmod.api.minecraft.ModPlatform;
 import io.github.kurrycat.mpkmod.api.log.ILogger;
 import io.github.kurrycat.mpkmod.api.module.IModule;
 import io.github.kurrycat.mpkmod.api.module.IVersionConstraint;
 import io.github.kurrycat.mpkmod.api.module.ModuleRegistry;
-import io.github.kurrycat.mpkmod.api.service.StandardServiceProvider;
 import io.github.kurrycat.mpkmod.api.service.ServiceProvider;
+import io.github.kurrycat.mpkmod.api.service.StandardServiceProvider;
 import io.github.kurrycat.mpkmod.util.FileUtil;
 import io.github.kurrycat.mpkmod.util.MultiParentClassLoader;
 import io.github.kurrycat.mpkmod.util.StringUtil;
@@ -34,7 +33,9 @@ public final class ModuleRegistryImpl implements ModuleRegistry {
         }
     }
 
-    final static ILogger LOGGER = ModPlatform.LOGGER.createSubLogger("module");
+    final static ILogger LOGGER = ILogger.createLogger(ModuleRegistry.class.getSimpleName());
+
+    private final static ILogger MODULE_LOGGER = ILogger.createLogger("module");
 
     private final Set<String> disabledModuleIds = new HashSet<>();
     private final Map<Path, DiscoveredModule> errorModules = new HashMap<>();
@@ -198,7 +199,7 @@ public final class ModuleRegistryImpl implements ModuleRegistry {
 
             ClassLoader parent = buildClassLoaderHierarchy(dependencyClassLoaders);
             DowngradingClassLoader loader = new DowngradingClassLoader(ClassDowngrader.getCurrentVersionDowngrader(), parent);
-            loader.addDelegate(new URL[]{cachedModule.source().toUri().toURL()});
+            loader.addDelegate(new URL[] { cachedModule.source().toUri().toURL() });
 
             Class<?> entrypointClass;
             try {
@@ -227,7 +228,7 @@ public final class ModuleRegistryImpl implements ModuleRegistry {
                         .build();
             }
 
-            ILogger logger = LOGGER.createSubLogger(cachedModule.entry().id());
+            ILogger logger = MODULE_LOGGER.createSubLogger(cachedModule.entry().id());
             try {
                 moduleInstance.onLoad(cachedModule.entry(), logger);
             } catch (Throwable e) {
@@ -264,7 +265,6 @@ public final class ModuleRegistryImpl implements ModuleRegistry {
     @Override
     public void loadAllModules() {
         loadModules();
-        LOGGER.info("enable stacktrace: {}", ModuleLoadException.ENABLE_STACKTRACE);
         LOGGER.info("Loaded modules: {}", loadedModules.keySet());
         LOGGER.info("Disabled modules: {}", disabledModules.keySet());
         LOGGER.info("Errored modules:");

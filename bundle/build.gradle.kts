@@ -1,11 +1,12 @@
 import buildlogic.MergeServiceFilesTask
-import org.gradle.api.internal.catalog.DelegatingProjectDependency
+import buildlogic.jars
+import buildlogic.tasks
 
 plugins {
     id("jar-defaults-conventions")
 }
 
-val components: List<DelegatingProjectDependency> = listOf(
+val components: List<Project> = listOf(
     projects.injectTags,
     projects.commonApi,
     projects.commonImpl,
@@ -14,47 +15,64 @@ val components: List<DelegatingProjectDependency> = listOf(
     //projects.serviceProviders.transformer,
     projects.serviceProviders.entrypoint.transformer,
     projects.serviceProviders.entrypoint.loader,
-    projects.modules.main
-)
+).map { evaluationDependsOn(it.path); project(it.path) }
 
-components.forEach { evaluationDependsOn(it.path) }
-val componentProjects = components.map { it.path }.map(::project)
+val modules = listOf(
+    projects.modules.main,
+).map { evaluationDependsOn(it.path); project(it.path) }
+
+val embedDep by configurations.creating
+
+dependencies {
+    embedDep(libs.jvmdowngrader) {
+        exclude(group = "org.ow2.asm", module = "asm")
+        exclude(group = "org.ow2.asm", module = "asm-tree")
+        exclude(group = "org.ow2.asm", module = "asm-commons")
+        exclude(group = "org.ow2.asm", module = "asm-util")
+    }
+    embedDep(libs.jtoml)
+}
 
 val mergeServiceFiles by tasks.registering(MergeServiceFilesTask::class) {
-    val componentJarTasks = componentProjects.map { it.tasks.named<Jar>("jar") }
-    dependsOn(componentJarTasks)
-
-    sourceJars.from(componentJarTasks.map { it.flatMap(Jar::getArchiveFile) })
+    tasks<Jar>(components, "jar").let {
+        dependsOn(it)
+        sourceJars.from(jars(it))
+    }
 }
 
 tasks.named<Jar>("jar") {
-    val componentJarTasks = componentProjects.map { it.tasks.named<Jar>("jar") }
-    dependsOn(componentJarTasks)
+    duplicatesStrategy = DuplicatesStrategy.WARN
 
-    componentJarTasks
-        .map { it.flatMap(Jar::getArchiveFile) }
-        .map { zipTree(it) }
-        .let {
-            from(it) {
-                exclude("META-INF/services/**")
-            }
+    tasks<Jar>(components, "jar").let {
+        dependsOn(it)
+        from(jars(it).map(::zipTree)) {
+            exclude("META-INF/services/**")
         }
+    }
+
+    tasks<Jar>(modules, "jar").let {
+        dependsOn(it)
+        from(jars(it)) {
+            into("mpkmodules")
+        }
+    }
+
+    from(embedDep.resolve().map(::zipTree))
 
     from(mergeServiceFiles)
+
+    from(rootProject.layout.projectDirectory.file("LICENSE"))
 }
 
 tasks.named<Jar>("sourcesJar") {
-    val componentSourceJarTasks = componentProjects.map { it.tasks.named<Jar>("sourcesJar") }
-    dependsOn(componentSourceJarTasks)
-
-    componentSourceJarTasks
-        .map { it.flatMap(Jar::getArchiveFile) }
-        .map { zipTree(it) }
-        .let {
-            from(it) {
-                exclude("META-INF/services/**")
-            }
+    tasks<Jar>(components, "sourcesJar").let {
+        dependsOn(it)
+        from(jars(it).map(::zipTree)) {
+            exclude("META-INF/services/**")
         }
+    }
 
     from(mergeServiceFiles)
+
+    from(rootProject.layout.projectDirectory.file("LICENSE"))
 }

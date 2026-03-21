@@ -22,7 +22,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.regex.Pattern;
 
@@ -36,9 +35,9 @@ import java.util.regex.Pattern;
  * name = "ExampleModule"
  * description = "Example Module"
  * authors = ["ExampleAuthor"]
- * # source = "https://github.com/example/example-mod"
+ * source = "https://github.com/example/example-mod"
  * license = "MIT"
- * # icon = "assets/modules/examplemod/icon.png"
+ * icon = "assets/modules/examplemod/icon.png"
  *
  * [dependencies]
  * # core = ">=1.0.0"
@@ -150,7 +149,7 @@ public final class ModuleConfig {
             throw errors.build();
         }
 
-        Path icon = FileUtil.resolve(root, Objects.requireNonNull(iconString));
+        Path icon = iconString == null ? null : FileUtil.resolve(root, iconString);
 
         return new ModuleEntry(
                 id, version, entrypoint, name, description, authors, source, license, icon, dependencies
@@ -196,7 +195,7 @@ public final class ModuleConfig {
         boolean error = false;
         for (int i = 0; i < tomlArray.size(); i++) {
             TomlValue tomlValue = tomlArray.get(i);
-            if (!tomlValue.isPrimitive() || !value.asPrimitive().isString()) {
+            if (!tomlValue.isPrimitive() || !tomlValue.asPrimitive().isString()) {
                 expectedArr(key, i, "string", errors);
                 error = true;
             } else list.add(tomlValue.asPrimitive().asString());

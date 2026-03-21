@@ -1,10 +1,13 @@
 package io.github.kurrycat.mpkmod.service;
 
 import com.google.auto.service.AutoService;
+import io.github.kurrycat.mpkmod.api.App;
 import io.github.kurrycat.mpkmod.api.log.ILogger;
+import io.github.kurrycat.mpkmod.api.log.LogManager;
 import io.github.kurrycat.mpkmod.api.service.ServiceHandle;
 import io.github.kurrycat.mpkmod.api.service.ServiceManager;
 import io.github.kurrycat.mpkmod.api.service.ServiceProvider;
+import io.github.kurrycat.mpkmod.api.service.Services;
 import io.github.kurrycat.mpkmod.log.StdoutLogger;
 import org.jetbrains.annotations.NotNull;
 
@@ -65,7 +68,10 @@ public final class ServiceManagerImpl implements ServiceManager {
     public void initialize() {
         if (initialized) return;
         LOGGER.log("Initializing logger service...");
-        LOGGER = ILogger.createLogger(ServiceManager.class.getSimpleName()).createFixed(LOG_LEVEL);
+        // don't use ILogger.createLogger() here to prevent early initializing the Holder subclass, which would cause a cycle
+        LOGGER = Services.getHandle(LogManager.class).get()
+                .createLogger(App.id() + "/" + ServiceManager.class.getSimpleName())
+                .createFixed(LOG_LEVEL);
         if (LOGGER.parentLogger() instanceof StdoutLogger) {
             LOGGER.log("Failed to initialize logger service, continuing with fallback logger");
         } else {

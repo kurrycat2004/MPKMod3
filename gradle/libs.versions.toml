@@ -1,35 +1,39 @@
 [versions]
 asm = "9.8"
 auto-service = "1.1.1"
-discordGameSdk = "v1.0.0"
 commons-compress = "1.28.0"
-fastutil = "8.5.15"
+discordGameSdk = "v1.0.0"
 fabric-loader = "0.18.4"
 fabric-loom = "1.15-SNAPSHOT"
-jackson = "2.15.0-rc1"
+fastutil = "8.5.15"
 javapoet = "1.13.0"
 jetbrains-annotations = "24.1.0"
 joml = "1.10.8"
 jtoml = "1.5.2"
 jvmdowngrader = "1.4.0-SNAPSHOT"
-unimined = "1.4.2-SNAPSHOT"
-shadow = "9.0.0-beta12"
+lwjgl3 = "3.4.1"
+mixin = "0.8.7"
 
-comp-log-log4j = "2.0-beta9"
-comp-log-slf4j = "1.8.0-beta4"
-comp-core-asm4 = "4.1"
-comp-core-asm5 = "5.0.3"
-comp-core-mixin = "0.8.4"
-comp-core-modlauncher = "2.1.5"
-comp-lwjgl-lwjgl2 = "2.9.4+legacyfabric.8"
-comp-lwjgl-lwjgl3 = "3.4.1"
+# Version locked for legacy
+asm4 = "4.1"
+asm5 = "5.0.3"
+log4j = "2.0-beta9"
+lwjgl2 = "2.9.4+legacyfabric.8"
+modlauncher = "2.1.5"
+slf4j = "1.8.0-beta4"
 
 [libraries]
-auto-service-annotations = { module = "com.google.auto.service:auto-service-annotations", version.ref = "auto-service" }
-auto-service = { module = "com.google.auto.service:auto-service", version.ref = "auto-service" }
 asm = { module = "org.ow2.asm:asm", version.ref = "asm" }
-asm-tree = { module = "org.ow2.asm:asm-tree", version.ref = "asm" }
 asm-commons = { module = "org.ow2.asm:asm-commons", version.ref = "asm" }
+asm-tree = { module = "org.ow2.asm:asm-tree", version.ref = "asm" }
+asm4 = { module = "org.ow2.asm:asm", version.ref = "asm4" }
+asm4-commons = { module = "org.ow2.asm:asm-commons", version.ref = "asm4" }
+asm4-tree = { module = "org.ow2.asm:asm-tree", version.ref = "asm4" }
+asm5 = { module = "org.ow2.asm:asm", version.ref = "asm5" }
+asm5-commons = { module = "org.ow2.asm:asm-commons", version.ref = "asm5" }
+asm5-tree = { module = "org.ow2.asm:asm-tree", version.ref = "asm5" }
+auto-service = { module = "com.google.auto.service:auto-service", version.ref = "auto-service" }
+auto-service-annotations = { module = "com.google.auto.service:auto-service-annotations", version.ref = "auto-service" }
 commons-compress = { module = "org.apache.commons:commons-compress", version.ref = "commons-compress" }
 fabric-loader = { module = "net.fabricmc:fabric-loader", version.ref = "fabric-loader" }
 javapoet = { module = "com.squareup:javapoet", version.ref = "javapoet" }
@@ -38,37 +42,17 @@ joml = { module = "org.joml:joml", version.ref = "joml" }
 jtoml = { module = "io.github.wasabithumb:jtoml", version.ref = "jtoml" }
 jtoml-serializer-reflect = { module = "io.github.wasabithumb:jtoml-serializer-reflect", version.ref = "jtoml" }
 jvmdowngrader = { module = "xyz.wagyourtail.jvmdowngrader:jvmdowngrader", version.ref = "jvmdowngrader" }
-shadow-gradle-plugin = { module = "com.gradleup.shadow:shadow-gradle-plugin", version.ref = "shadow" }
-
-comp-log4j-api = { module = "org.apache.logging.log4j:log4j-api", version.ref = "comp-log-log4j" }
-comp-slf4j-api = { module = "org.slf4j:slf4j-api", version.ref = "comp-log-slf4j" }
-comp-core-asm4 = { module = "org.ow2.asm:asm", version.ref = "comp-core-asm4" }
-comp-core-asm4-tree = { module = "org.ow2.asm:asm-tree", version.ref = "comp-core-asm4" }
-comp-core-asm4-commons = { module = "org.ow2.asm:asm-commons", version.ref = "comp-core-asm4" }
-comp-core-asm5 = { module = "org.ow2.asm:asm", version.ref = "comp-core-asm5" }
-comp-core-asm5-tree = { module = "org.ow2.asm:asm-tree", version.ref = "comp-core-asm5" }
-comp-core-asm5-commons = { module = "org.ow2.asm:asm-commons", version.ref = "comp-core-asm5" }
-comp-core-mixin = { module = "org.spongepowered:mixin", version.ref = "comp-core-mixin" }
-comp-core-modlauncher = { module = "cpw.mods:modlauncher", version.ref = "comp-core-modlauncher" }
-comp-lwjgl-lwjgl2 = { module = "org.lwjgl.lwjgl:lwjgl", version.ref = "comp-lwjgl-lwjgl2" }
-comp-lwjgl-lwjgl3 = { module = "org.lwjgl:lwjgl-opengl", version.ref = "comp-lwjgl-lwjgl3" }
+log4j-api = { module = "org.apache.logging.log4j:log4j-api", version.ref = "log4j" }
+lwjgl2 = { module = "org.lwjgl.lwjgl:lwjgl", version.ref = "lwjgl2" }
+lwjgl3 = { module = "org.lwjgl:lwjgl-opengl", version.ref = "lwjgl3" }
+mixin = { module = "org.spongepowered:mixin", version.ref = "mixin" }
+modlauncher = { module = "cpw.mods:modlauncher", version.ref = "modlauncher" }
+slf4j-api = { module = "org.slf4j:slf4j-api", version.ref = "slf4j" }
 
 [bundles]
-asm = [
-    "asm",
-    "asm-tree",
-    "asm-commons",
-]
-comp-core-asm4 = [
-    "comp-core-asm4",
-    "comp-core-asm4-tree",
-    "comp-core-asm4-commons",
-]
-comp-core-asm5 = [
-    "comp-core-asm5",
-    "comp-core-asm5-tree",
-    "comp-core-asm5-commons",
-]
+asm = ["asm", "asm-tree", "asm-commons"]
+asm4 = ["asm4", "asm4-tree", "asm4-commons"]
+asm5 = ["asm5", "asm5-tree", "asm5-commons"]
 
 [plugins]
 fabric-loom = { id = "net.fabricmc.fabric-loom", version.ref = "fabric-loom" }

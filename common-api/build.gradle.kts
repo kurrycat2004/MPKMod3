@@ -3,7 +3,7 @@ plugins {
 }
 
 dependencies {
-    compileOnly(libs.comp.core.asm4.tree)
+    compileOnly(libs.asm4.tree)
     compileOnly(libs.joml)
     compileOnlyApi(libs.jetbrains.annotations)
 }

@@ -20,8 +20,8 @@ dependencies {
         it.annotationProcessor(this, libs.auto.service)
     }
 
-    lwjgl2.compileOnly(this, libs.comp.lwjgl.lwjgl2)
-    lwjgl3.compileOnly(this, libs.comp.lwjgl.lwjgl3)
+    lwjgl2.compileOnly(this, libs.lwjgl2)
+    lwjgl3.compileOnly(this, libs.lwjgl3)
     opengl.compileOnly(this, libs.joml)
 }
 
