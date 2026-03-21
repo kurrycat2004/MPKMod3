@@ -1,28 +1,44 @@
-@file:Suppress("PropertyName")
+import buildlogic.RunConfiguration
+import buildlogic.projectName
+import net.fabricmc.loom.api.LoomGradleExtensionAPI
 
 plugins {
-    alias(libs.plugins.fabric.loom.remap)
+    alias(libs.plugins.fabric.loom.remap) apply false
 }
 
-val v1_20_1 = sourceSets.create("1.20.1")
+val fabricLoomRemapPluginId = libs.plugins.fabric.loom.remap.get().pluginId;
+val bundleProject = projects.bundle
+val fabricLoader = libs.fabric.loader
 
-val variants = listOf(v1_20_1)
+val runConfigurationFile = file("../run-configuration.toml")
+val runConfigurations: RunConfiguration = RunConfiguration.read(runConfigurationFile.toPath())
 
-dependencies {
-    minecraft("com.mojang:minecraft:1.20.1")
-    mappings("net.fabricmc:yarn:1.20.1+build.10:v2")
-    modImplementation("net.fabricmc:fabric-loader:0.18.4")
-    runtimeOnly(projects.bundle)
-}
+runConfigurations.fabric.forEach { fabric ->
+    project(":runs:fabric:${fabric.projectName()}") {
+        pluginManager.apply(fabricLoomRemapPluginId)
 
-loom {
-    runs {
-        named("client") {
-            vmArgs("-Dmpkmod.module.enableModuleLoadStacktrace=true")
+        repositories {
+            maven("https://maven.legacyfabric.net/")
+        }
+
+        dependencies {
+            add("minecraft", "com.mojang:minecraft:${fabric.version}")
+            add("mappings", fabric.mappings)
+            add("modImplementation", fabricLoader)
+            add("runtimeOnly", bundleProject)
+        }
+
+        extensions.configure<LoomGradleExtensionAPI> {
+            runs {
+                named("client") {
+                    runDir("../run")
+                    vmArgs("-Dmpkmod.module.enableModuleLoadStacktrace=true")
+
+                    if (fabric.version.startsWith("1.7")) {
+                        programArgs("--userProperties", "{}")
+                    }
+                }
+            }
         }
     }
-}
-
-java {
-    toolchain.languageVersion = JavaLanguageVersion.of(21)
 }
