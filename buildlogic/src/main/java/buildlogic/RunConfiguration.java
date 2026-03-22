@@ -7,10 +7,16 @@ import java.nio.file.Path;
 import java.util.List;
 
 public record RunConfiguration(
-        List<Fabric> fabric
+        List<Fabric> fabric,
+        List<Forge> forge
 ) {
     public record Fabric(
-            String version,
+            String mcVersion,
+            String mappings
+    ) {}
+
+    public record Forge(
+            String mcVersion,
             String mappings
     ) {}
 

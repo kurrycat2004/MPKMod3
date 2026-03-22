@@ -13,6 +13,7 @@ jtoml = "1.5.2"
 jvmdowngrader = "1.4.0-SNAPSHOT"
 lwjgl3 = "3.4.1"
 mixin = "0.8.7"
+retrofuturagradle = "2.0.2"
 
 # Version locked for legacy
 asm4 = "4.1"
@@ -58,3 +59,4 @@ asm5 = ["asm5", "asm5-tree", "asm5-commons"]
 fabric-loom = { id = "net.fabricmc.fabric-loom", version.ref = "fabric-loom" }
 fabric-loom-remap = { id = "net.fabricmc.fabric-loom-remap", version.ref = "fabric-loom" }
 jvmdowngrader = { id = "xyz.wagyourtail.jvmdowngrader", version.ref = "jvmdowngrader" }
+retrofuturagradle = { id = "com.gtnewhorizons.retrofuturagradle", version.ref = "retrofuturagradle" }

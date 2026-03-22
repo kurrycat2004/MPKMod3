@@ -22,7 +22,7 @@ runConfigurations.fabric.forEach { fabric ->
         }
 
         dependencies {
-            add("minecraft", "com.mojang:minecraft:${fabric.version}")
+            add("minecraft", "com.mojang:minecraft:${fabric.mcVersion}")
             add("mappings", fabric.mappings)
             add("modImplementation", fabricLoader)
             add("runtimeOnly", bundleProject)
@@ -34,7 +34,7 @@ runConfigurations.fabric.forEach { fabric ->
                     runDir("../run")
                     vmArgs("-Dmpkmod.module.enableModuleLoadStacktrace=true")
 
-                    if (fabric.version.startsWith("1.7")) {
+                    if (fabric.mcVersion.startsWith("1.7")) {
                         programArgs("--userProperties", "{}")
                     }
                 }

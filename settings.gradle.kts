@@ -15,6 +15,7 @@ pluginManagement {
         maven("https://files.minecraftforge.net/maven")
         maven("https://maven.wagyourtail.xyz/releases")
         maven("https://maven.wagyourtail.xyz/snapshots")
+        maven("https://nexus.gtnewhorizons.com/repository/public/")
     }
 }
 
@@ -28,14 +29,14 @@ dependencyResolutionManagement {
         mavenLocal()
         mavenCentral()
         gradlePluginPortal()
-        maven("https://files.minecraftforge.net/maven")
-        maven("https://maven.fabricmc.net")
-        maven("https://maven.legacyfabric.net")
-        //maven("https://maven.minecraftforge.net")
-        //maven("https://maven.neoforged.net/releases")
-        //maven("https://maven.wagyourtail.xyz/releases")
-        maven("https://maven.wagyourtail.xyz/snapshots")
-        //maven("https://repo.spongepowered.org/maven")
+        maven("https://files.minecraftforge.net/maven/")
+        maven("https://maven.fabricmc.net/")
+        maven("https://maven.legacyfabric.net/")
+        //maven("https://maven.minecraftforge.net/")
+        //maven("https://maven.neoforged.net/releases/")
+        //maven("https://maven.wagyourtail.xyz/releases/")
+        maven("https://maven.wagyourtail.xyz/snapshots/")
+        //maven("https://repo.spongepowered.org/maven/")
     }
 }
 
@@ -57,8 +58,15 @@ include("modules:main")
 // run configurations
 val runConfigurationFile = file("runs/run-configuration.toml")
 val runConfigurations: RunConfiguration = RunConfiguration.read(runConfigurationFile.toPath())
+
 include("runs:fabric")
 runConfigurations.fabric.forEach {
     file("runs/fabric/${it.projectName()}").mkdirs()
     include("runs:fabric:${it.projectName()}")
+}
+
+include("runs:forge")
+runConfigurations.forge.forEach {
+    file("runs/forge/${it.projectName()}").mkdirs()
+    include("runs:forge:${it.projectName()}")
 }
