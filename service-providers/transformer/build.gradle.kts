@@ -1,5 +1,8 @@
+import buildlogic.MergeMetaTask
 import buildlogic.annotationProcessor
 import buildlogic.compileOnly
+import buildlogic.excludeMeta
+import buildlogic.mergeMeta
 
 plugins {
     id("jar-defaults-conventions")
@@ -21,10 +24,16 @@ dependencies {
     }
 }
 
-tasks.jar {
-    from(variants.map { it.output })
+val mergeMetaTask by tasks.registering(MergeMetaTask::class) {
+    sourceRoots.from(variants.map { it.output })
 }
 
-tasks.named<Jar>("sourcesJar") {
-    from(variants.map { it.allSource })
+tasks.jar {
+    from(variants.map { it.output }) { excludeMeta() }
+    mergeMeta(mergeMetaTask)
+}
+
+tasks.sourcesJar {
+    from(variants.map { it.allSource }) { excludeMeta() }
+    mergeMeta(mergeMetaTask)
 }

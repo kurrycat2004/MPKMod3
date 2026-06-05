@@ -1,4 +1,4 @@
-package io.github.kurrycat.mpkmod.api.minecraft;
+package io.github.kurrycat.mpkmod.api.loader;
 
 import io.github.kurrycat.mpkmod.api.App;
 import io.github.kurrycat.mpkmod.api.log.ILogger;

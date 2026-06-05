@@ -2,7 +2,7 @@ package io.github.kurrycat.mpkmod.loader.fabric;
 
 import com.google.auto.service.AutoService;
 import io.github.kurrycat.mpkmod.api.App;
-import io.github.kurrycat.mpkmod.api.minecraft.ModPlatform;
+import io.github.kurrycat.mpkmod.api.loader.ModPlatform;
 import io.github.kurrycat.mpkmod.api.service.ServiceProvider;
 import io.github.kurrycat.mpkmod.api.service.StandardServiceProvider;
 import net.fabricmc.loader.api.FabricLoader;

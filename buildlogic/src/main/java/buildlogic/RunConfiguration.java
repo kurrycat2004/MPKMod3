@@ -11,14 +11,21 @@ public record RunConfiguration(
         List<Forge> forge
 ) {
     public record Fabric(
-            String mcVersion,
+            String minecraft,
             String mappings
     ) {}
 
     public record Forge(
-            String mcVersion,
-            String mappings
-    ) {}
+            String minecraft,
+            String java,
+            String forge,
+            Mappings mappings
+    ) {
+        public record Mappings(
+                String channel,
+                String version
+        ) {}
+    }
 
     public static RunConfiguration read(Path path) {
         JToml toml = JToml.jToml();

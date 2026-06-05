@@ -13,6 +13,7 @@ public record ModMetadata(
         String version,
         String description,
         String license,
+        String logoFile,
         List<String> authors,
         String homepage,
         String sources,

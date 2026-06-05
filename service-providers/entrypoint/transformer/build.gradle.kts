@@ -1,5 +1,8 @@
+import buildlogic.MergeMetaTask
 import buildlogic.annotationProcessor
 import buildlogic.compileOnly
+import buildlogic.excludeMeta
+import buildlogic.mergeMeta
 
 plugins {
     id("jar-defaults-conventions")
@@ -11,6 +14,10 @@ val mixin by sourceSets.creating
 val modlauncher by sourceSets.creating
 
 val variants = listOf(fml, mixin, modlauncher)
+
+repositories {
+    maven("https://files.minecraftforge.net/maven/")
+}
 
 dependencies {
     variants.forEach { it.compileOnly(this, projects.commonApi) }
@@ -26,11 +33,16 @@ dependencies {
     modlauncher.compileOnly(this, libs.bundles.asm4)
 }
 
+val mergeMetaTask by tasks.registering(MergeMetaTask::class) {
+    sourceRoots.from(variants.map { it.output })
+}
+
 tasks.jar {
-    from(variants.map { it.output })
+    from(variants.map { it.output }) { excludeMeta() }
+    mergeMeta(mergeMetaTask)
 }
 
-tasks.named<Jar>("sourcesJar") {
-    from(variants.map { it.allSource })
+tasks.sourcesJar {
+    from(variants.map { it.allSource }) { excludeMeta() }
+    mergeMeta(mergeMetaTask)
 }
-

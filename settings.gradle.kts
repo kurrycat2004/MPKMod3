@@ -12,10 +12,9 @@ pluginManagement {
         mavenCentral()
         gradlePluginPortal()
         maven("https://maven.fabricmc.net/")
-        maven("https://files.minecraftforge.net/maven")
-        maven("https://maven.wagyourtail.xyz/releases")
+        //maven("https://maven.wagyourtail.xyz/releases")
         maven("https://maven.wagyourtail.xyz/snapshots")
-        maven("https://nexus.gtnewhorizons.com/repository/public/")
+        //maven("https://nexus.gtnewhorizons.com/repository/public/")
     }
 }
 
@@ -28,15 +27,6 @@ dependencyResolutionManagement {
     repositories {
         mavenLocal()
         mavenCentral()
-        gradlePluginPortal()
-        maven("https://files.minecraftforge.net/maven/")
-        maven("https://maven.fabricmc.net/")
-        maven("https://maven.legacyfabric.net/")
-        //maven("https://maven.minecraftforge.net/")
-        //maven("https://maven.neoforged.net/releases/")
-        //maven("https://maven.wagyourtail.xyz/releases/")
-        maven("https://maven.wagyourtail.xyz/snapshots/")
-        //maven("https://repo.spongepowered.org/maven/")
     }
 }
 
@@ -45,7 +35,7 @@ includeBuild("buildlogic")
 include("bundle")
 include("common-api")
 include("common-impl")
-include("inject-tags")
+include("inject-mod-metadata")
 include("service-providers:log")
 include("service-providers:lwjgl")
 include("service-providers:transformer")

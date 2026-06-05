@@ -43,7 +43,7 @@ public final class CoreMixinPlugin implements IMixinConfigPlugin {
                     .newInstance(tryTransformHandle, shouldTransformHandle);
             injectIntoCoprocessorList(coprocessors, coreCoProcClass, coreCoProcessor);
 
-            transformerManager.tryInitialize(IMixinConfigPlugin.class.getSimpleName());
+            transformerManager.tryInitialize(IMixinConfigPlugin.class);
         } catch (ReflectiveOperationException | ClassCastException e) {
             LOGGER.error("Failed to initialize core mixin plugin", e);
         }

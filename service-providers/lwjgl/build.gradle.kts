@@ -1,6 +1,8 @@
-import buildlogic.MergeServiceFilesTask
+import buildlogic.MergeMetaTask
 import buildlogic.annotationProcessor
 import buildlogic.compileOnly
+import buildlogic.excludeMeta
+import buildlogic.mergeMeta
 
 plugins {
     id("jar-defaults-conventions")
@@ -12,6 +14,11 @@ val lwjgl2 by sourceSets.creating { compileClasspath += shared.output }
 val lwjgl3 by sourceSets.creating { compileClasspath += shared.output }
 
 val variants = listOf(shared, opengl, lwjgl2, lwjgl3)
+
+repositories {
+    mavenCentral()
+    maven("https://maven.legacyfabric.net/")
+}
 
 dependencies {
     variants.forEach {
@@ -25,20 +32,16 @@ dependencies {
     opengl.compileOnly(this, libs.joml)
 }
 
-val mergeServiceFiles by tasks.registering(MergeServiceFilesTask::class) {
+val mergeMetaTask by tasks.registering(MergeMetaTask::class) {
     sourceRoots.from(variants.map { it.output })
 }
 
 tasks.jar {
-    from(variants.map { it.output }) {
-        exclude("META-INF/services/**")
-    }
-    from(mergeServiceFiles)
+    from(variants.map { it.output }) { excludeMeta() }
+    mergeMeta(mergeMetaTask)
 }
 
-tasks.named<Jar>("sourcesJar") {
-    from(variants.map { it.allSource }) {
-        exclude("META-INF/services/**")
-    }
-    from(mergeServiceFiles)
+tasks.sourcesJar {
+    from(variants.map { it.allSource }) { excludeMeta() }
+    mergeMeta(mergeMetaTask)
 }

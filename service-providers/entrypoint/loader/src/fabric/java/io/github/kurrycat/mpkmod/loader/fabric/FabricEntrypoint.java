@@ -1,6 +1,6 @@
 package io.github.kurrycat.mpkmod.loader.fabric;
 
-import io.github.kurrycat.mpkmod.api.minecraft.ModPlatform;
+import io.github.kurrycat.mpkmod.api.loader.ModPlatform;
 import net.fabricmc.api.ModInitializer;
 
 public class FabricEntrypoint implements ModInitializer {

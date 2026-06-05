@@ -5,6 +5,8 @@ commons-compress = "1.28.0"
 discordGameSdk = "v1.0.0"
 fabric-loader = "0.18.4"
 fabric-loom = "1.15-SNAPSHOT"
+forge-gradle = "7.0.25"
+forge-renamer = "1.0.14"
 fastutil = "8.5.15"
 javapoet = "1.13.0"
 jetbrains-annotations = "24.1.0"
@@ -58,5 +60,7 @@ asm5 = ["asm5", "asm5-tree", "asm5-commons"]
 [plugins]
 fabric-loom = { id = "net.fabricmc.fabric-loom", version.ref = "fabric-loom" }
 fabric-loom-remap = { id = "net.fabricmc.fabric-loom-remap", version.ref = "fabric-loom" }
+forge-gradle = { id = "net.minecraftforge.gradle", version.ref = "forge-gradle" }
+forge-renamer = { id = "net.minecraftforge.renamer", version.ref = "forge-renamer" }
 jvmdowngrader = { id = "xyz.wagyourtail.jvmdowngrader", version.ref = "jvmdowngrader" }
 retrofuturagradle = { id = "com.gtnewhorizons.retrofuturagradle", version.ref = "retrofuturagradle" }

@@ -1,13 +1,17 @@
 import buildlogic.GenerateModMetadata
+import buildlogic.MergeMetaTask
 import buildlogic.annotationProcessor
 import buildlogic.compileOnly
+import buildlogic.excludeMeta
 import buildlogic.json
+import buildlogic.mergeMeta
 
 plugins {
     id("jar-defaults-conventions")
 }
 
 val generateFabricModJson by tasks.registering(GenerateModMetadata::class) {
+    outputDir.set(layout.buildDirectory.dir("generated/resources/fabric"))
     relativeOutputPath.set("fabric.mod.json")
 
     content.set(metadata.map { meta ->
@@ -24,7 +28,7 @@ val generateFabricModJson by tasks.registering(GenerateModMetadata::class) {
                 meta.issues()?.takeIf { it.isNotBlank() }?.let { put("issues", it) }
             },
             "license" to meta.license(),
-            "icon" to "assets/mpkmod/logo_x256.png",
+            "icon" to meta.logoFile(),
             "environment" to "client",
             "entrypoints" to mapOf(
                 "main" to listOf(
@@ -44,24 +48,75 @@ val generateFabricModJson by tasks.registering(GenerateModMetadata::class) {
     })
 }
 
+val generateForgeModToml by tasks.registering(GenerateModMetadata::class) {
+    outputDir.set(layout.buildDirectory.dir("generated/resources/forge"))
+    relativeOutputPath.set("mods.toml")
+
+    content.set(metadata.map { meta ->
+        """
+        modLoader = "javafml"
+        loaderVersion = "*"
+        license = "${meta.license()}"
+        issueTrackerURL = "${meta.issues()}"
+        clientSideOnly = true
+        
+        [[mods]]
+        modId = "${meta.id()}"
+        version = "${meta.version()}"
+        displayName = "${meta.name()}"
+        description = "${meta.description()}"
+        logoFile="${meta.logoFile()}"
+        # updateJSONURL = ""
+        authors = "${meta.authors().joinToString(", ")}"
+        displayURL = "${meta.homepage()}"
+    """.trimIndent()
+    })
+}
+
 val fabric by sourceSets.creating {
     resources.srcDir(generateFabricModJson.map { it.outputDir })
 }
 
-val variants = listOf(fabric)
+val forgeStubs by sourceSets.creating
+val forge by sourceSets.creating {
+    compileClasspath += forgeStubs.output
+    resources.srcDir(generateForgeModToml.map { it.outputDir })
+}
+
+val variants = listOf(
+    fabric,
+    forge,
+)
+
+repositories {
+    mavenCentral()
+    maven("https://maven.fabricmc.net/")
+    maven("https://maven.minecraftforge.net/")
+}
 
 dependencies {
-    fabric.compileOnly(this, libs.auto.service.annotations)
-    fabric.annotationProcessor(this, libs.auto.service)
+    variants.forEach {
+        it.compileOnly(this, libs.auto.service.annotations)
+        it.annotationProcessor(this, libs.auto.service)
 
-    fabric.compileOnly(this, projects.commonApi)
+        it.compileOnly(this, projects.commonApi)
+    }
+
     fabric.compileOnly(this, libs.fabric.loader)
+
+    compileOnly("net.minecraftforge:forge:1.12.2-14.23.5.2864:universal")
+}
+
+val mergeMetaTask by tasks.registering(MergeMetaTask::class) {
+    sourceRoots.from(variants.map { it.output })
 }
 
 tasks.jar {
-    from(variants.map { it.output })
+    from(variants.map { it.output }) { excludeMeta() }
+    mergeMeta(mergeMetaTask)
 }
 
-tasks.named<Jar>("sourcesJar") {
-    from(variants.map { it.allSource })
+tasks.sourcesJar {
+    from(variants.map { it.allSource }) { excludeMeta() }
+    mergeMeta(mergeMetaTask)
 }

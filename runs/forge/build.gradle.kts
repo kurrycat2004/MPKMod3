@@ -1,48 +1,95 @@
 import buildlogic.RunConfiguration
 import buildlogic.projectName
-import com.gtnewhorizons.retrofuturagradle.MinecraftExtension
-import com.gtnewhorizons.retrofuturagradle.minecraft.RunMinecraftTask
+import net.minecraftforge.gradle.ForgeGradleExtension
+import net.minecraftforge.gradle.MinecraftExtension
+import net.minecraftforge.gradle.MinecraftExtensionForProject
+import net.minecraftforge.gradle.shadow.net.minecraftforge.gradleutils.shared.ToolsExtension
+import java.util.jar.JarFile
 
 plugins {
-    alias(libs.plugins.retrofuturagradle) apply false
+    alias(libs.plugins.forge.gradle) apply false
+    alias(libs.plugins.forge.renamer) apply false
 }
 
-val rfgPluginId = libs.plugins.retrofuturagradle.get().pluginId;
+val forgeGradlePluginId = libs.plugins.forge.gradle.get().pluginId;
+val forgeRenamerPluginId = libs.plugins.forge.renamer.get().pluginId;
 val bundleProject = projects.bundle
-val lwjgl2 = libs.versions.lwjgl2.get()
 
 val runConfigurationFile = file("../run-configuration.toml")
 val runConfigurations: RunConfiguration = RunConfiguration.read(runConfigurationFile.toPath())
 
 runConfigurations.forge.forEach { forge ->
     project(":runs:forge:${forge.projectName()}") {
-        pluginManager.apply(rfgPluginId)
+        pluginManager.apply("java")
+        pluginManager.apply(forgeGradlePluginId)
+        pluginManager.apply(forgeRenamerPluginId)
+
+        extensions.configure<JavaPluginExtension> {
+            toolchain.languageVersion = JavaLanguageVersion.of(forge.java)
+        }
 
         repositories {
-            maven("https://maven.legacyfabric.net/")
+            mavenLocal()
+            extensions.getByType<MinecraftExtension>().mavenizer(this)
+            maven(extensions.getByType<ForgeGradleExtension>().forgeMaven)
+            maven(extensions.getByType<ForgeGradleExtension>().minecraftLibsMaven)
+            maven("https://cursemaven.com")
+        }
+
+        //TODO: remove after https://github.com/MinecraftForge/MinecraftMavenizer/pull/29 is merged
+        extensions.configure<ToolsExtension> {
+            configure("slimelauncher") {
+                version = "0.2.1"
+            }
+            configure("mavenizer") {
+                version = "0.5.10"
+            }
         }
 
         extensions.configure<MinecraftExtension> {
-            mcVersion = forge.mcVersion
-            //lwjgl2Version = lwjgl2
+            mappings(forge.mappings.channel, forge.mappings.version)
         }
 
-        tasks.named<RunMinecraftTask>("runClient") {
-            workingDir = file("../run")
-            extraArgs = listOf("-Dmpkmod.module.enableModuleLoadStacktrace=true")
+        extensions.configure<MinecraftExtensionForProject> {
+            dependencies {
+                add(
+                    "implementation",
+                    dependency("net.minecraftforge:forge:${forge.minecraft}-${forge.forge}")
+                )
+                add("runtimeOnly", bundleProject)
+            }
+
+            runs {
+                register("client") {
+                    workingDir = file("../run/client/")
+                    jvmArgs("-Dmpkmod.service.logProviders=true")
+                    jvmArgs("-Dmpkmod.module.enableModuleLoadStacktrace=true")
+
+                    val coreMods = mutableListOf<String>()
+                    configurations["runtimeClasspath"].forEach {
+                        if (it.extension != "jar") return@forEach
+                        val manifest = JarFile(it).manifest ?: return@forEach
+                        val coreMod = manifest.mainAttributes.getValue("FMLCorePlugin") ?: return@forEach
+                        coreMods.add(coreMod)
+                    }
+                    jvmArgs("-Dfml.coreMods.load=${coreMods.joinToString(",")}")
+                }
+                /*register("server") {
+                    args("--nogui", "fml_bug", "--port", 25565 + 189)
+                    workingDir = file("../run/server/")
+                }*/
+            }
         }
 
-        dependencies {
-            //add("runtimeOnly", bundleProject)
-        }
+        /*extensions.configure<RenamerExtension> {
+            mappings.from(extensions.getByType<MinecraftExtensionForProject>().dependency.toSrgFile)
 
-        /*
-        dependencies {
-            add("minecraft", "com.mojang:minecraft:${forge.version}")
-            add("mappings", "de.oceanlabs.mcp:mcp_stable:22-1.8.9")
-            add("forge", "net.minecraftforge:forge:1.8.9-11.15.1.2318-1.8.9")
-            add("runtimeOnly", bundleProject)
-        }
-     */
+            dependencies {
+                add(
+                    "runtimeOnly",
+                    dependency("curse.maven:jei-238222:5846804")
+                )
+            }
+        }*/
     }
 }

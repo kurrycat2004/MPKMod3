@@ -15,7 +15,7 @@ public final class CoreLaunchPlugin implements ILaunchPluginService {
     private static final EnumSet<Phase> AFTER_TRANSFORM = EnumSet.of(Phase.AFTER);
     private static final EnumSet<Phase> NEVER = EnumSet.noneOf(Phase.class);
     private static final boolean hasInitialized = TransformerManager.HANDLE.get()
-            .tryInitialize(ILaunchPluginService.class.getSimpleName());
+            .tryInitialize(ILaunchPluginService.class);
 
     @Override
     public @NotNull String name() {

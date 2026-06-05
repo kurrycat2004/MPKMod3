@@ -1,4 +1,4 @@
 package buildlogic
 
-fun RunConfiguration.Fabric.projectName() = "mc-${mcVersion.replace('.', '-')}"
-fun RunConfiguration.Forge.projectName() = "mc-${mcVersion.replace('.', '-')}"
+fun RunConfiguration.Fabric.projectName() = "mc-${minecraft.replace('.', '-')}"
+fun RunConfiguration.Forge.projectName() = "mc-${minecraft.replace('.', '-')}"

@@ -17,7 +17,7 @@ public interface TransformerManager {
      * @param transformerPipelineType the transformer pipeline that is used
      * @return whether to run the transformer pipeline
      */
-    boolean tryInitialize(String transformerPipelineType);
+    boolean tryInitialize(Class<?> transformerPipelineType);
 
     /**
      * @param className the name of the class to be checked

@@ -6,7 +6,7 @@ plugins {
     alias(libs.plugins.fabric.loom.remap) apply false
 }
 
-val fabricLoomRemapPluginId = libs.plugins.fabric.loom.remap.get().pluginId;
+val fabricLoomRemapPluginId = libs.plugins.fabric.loom.remap.get().pluginId
 val bundleProject = projects.bundle
 val fabricLoader = libs.fabric.loader
 
@@ -22,7 +22,7 @@ runConfigurations.fabric.forEach { fabric ->
         }
 
         dependencies {
-            add("minecraft", "com.mojang:minecraft:${fabric.mcVersion}")
+            add("minecraft", "com.mojang:minecraft:${fabric.minecraft}")
             add("mappings", fabric.mappings)
             add("modImplementation", fabricLoader)
             add("runtimeOnly", bundleProject)
@@ -31,10 +31,10 @@ runConfigurations.fabric.forEach { fabric ->
         extensions.configure<LoomGradleExtensionAPI> {
             runs {
                 named("client") {
-                    runDir("../run")
+                    runDir("../run/client")
                     vmArgs("-Dmpkmod.module.enableModuleLoadStacktrace=true")
 
-                    if (fabric.mcVersion.startsWith("1.7")) {
+                    if (fabric.minecraft.startsWith("1.7")) {
                         programArgs("--userProperties", "{}")
                     }
                 }

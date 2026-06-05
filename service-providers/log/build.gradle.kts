@@ -1,6 +1,8 @@
-import buildlogic.MergeServiceFilesTask
+import buildlogic.MergeMetaTask
 import buildlogic.annotationProcessor
 import buildlogic.compileOnly
+import buildlogic.excludeMeta
+import buildlogic.mergeMeta
 
 plugins {
     id("jar-defaults-conventions")
@@ -22,20 +24,16 @@ dependencies {
     slf4j.compileOnly(this, libs.slf4j.api)
 }
 
-val mergeServiceFiles by tasks.registering(MergeServiceFilesTask::class) {
+val mergeMetaTask by tasks.registering(MergeMetaTask::class) {
     sourceRoots.from(variants.map { it.output })
 }
 
 tasks.jar {
-    from(variants.map { it.output }) {
-        exclude("META-INF/services/**")
-    }
-    from(mergeServiceFiles)
+    from(variants.map { it.output }) { excludeMeta() }
+    mergeMeta(mergeMetaTask)
 }
 
-tasks.named<Jar>("sourcesJar") {
-    from(variants.map { it.allSource }) {
-        exclude("META-INF/services/**")
-    }
-    from(mergeServiceFiles)
+tasks.sourcesJar {
+    from(variants.map { it.allSource }) { excludeMeta() }
+    mergeMeta(mergeMetaTask)
 }

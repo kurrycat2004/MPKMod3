@@ -1,5 +1,8 @@
-import buildlogic.MergeServiceFilesTask
+import buildlogic.MergeMetaTask
+import buildlogic.excludeMeta
 import buildlogic.jars
+import buildlogic.mergeMeta
+import buildlogic.registerDowngradedJvmVariant
 import buildlogic.tasks
 
 plugins {
@@ -7,7 +10,7 @@ plugins {
 }
 
 val components: List<Project> = listOf(
-    projects.injectTags,
+    projects.injectModMetadata,
     projects.commonApi,
     projects.commonImpl,
     projects.serviceProviders.log,
@@ -23,6 +26,11 @@ val modules = listOf(
 
 val embedDep by configurations.creating
 
+repositories {
+    mavenCentral()
+    maven("https://maven.wagyourtail.xyz/snapshots/")
+}
+
 dependencies {
     embedDep(libs.jvmdowngrader) {
         exclude(group = "org.ow2.asm", module = "asm")
@@ -33,21 +41,19 @@ dependencies {
     embedDep(libs.jtoml)
 }
 
-val mergeServiceFiles by tasks.registering(MergeServiceFilesTask::class) {
+val mergeMetaTask by tasks.registering(MergeMetaTask::class) {
     tasks<Jar>(components, "jar").let {
         dependsOn(it)
         sourceJars.from(jars(it))
     }
 }
 
-tasks.named<Jar>("jar") {
+tasks.jar {
     duplicatesStrategy = DuplicatesStrategy.WARN
 
     tasks<Jar>(components, "jar").let {
         dependsOn(it)
-        from(jars(it).map(::zipTree)) {
-            exclude("META-INF/services/**")
-        }
+        from(jars(it).map(::zipTree)) { excludeMeta() }
     }
 
     tasks<Jar>(modules, "jar").let {
@@ -59,20 +65,23 @@ tasks.named<Jar>("jar") {
 
     from(embedDep.resolve().map(::zipTree))
 
-    from(mergeServiceFiles)
+    mergeMeta(mergeMetaTask)
 
     from(rootProject.layout.projectDirectory.file("LICENSE"))
 }
 
-tasks.named<Jar>("sourcesJar") {
+registerDowngradedJvmVariant(
+    JavaVersion.VERSION_1_8,
+    sourceSets.main.map { it.compileClasspath }
+)
+
+tasks.sourcesJar {
     tasks<Jar>(components, "sourcesJar").let {
         dependsOn(it)
-        from(jars(it).map(::zipTree)) {
-            exclude("META-INF/services/**")
-        }
+        from(jars(it).map(::zipTree)) { excludeMeta() }
     }
 
-    from(mergeServiceFiles)
+    mergeMeta(mergeMetaTask)
 
     from(rootProject.layout.projectDirectory.file("LICENSE"))
 }

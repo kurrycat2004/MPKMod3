@@ -3,10 +3,10 @@ package io.github.kurrycat.mpkmod.transformer;
 import com.google.auto.service.AutoService;
 import io.github.kurrycat.mpkmod.api.App;
 import io.github.kurrycat.mpkmod.api.log.ILogger;
-import io.github.kurrycat.mpkmod.api.transformer.Transformer;
-import io.github.kurrycat.mpkmod.api.transformer.TransformerManager;
 import io.github.kurrycat.mpkmod.api.service.ServiceProvider;
 import io.github.kurrycat.mpkmod.api.service.StandardServiceProvider;
+import io.github.kurrycat.mpkmod.api.transformer.Transformer;
+import io.github.kurrycat.mpkmod.api.transformer.TransformerManager;
 import org.objectweb.asm.tree.ClassNode;
 
 import java.util.ServiceLoader;
@@ -33,10 +33,10 @@ public class TransformerManagerImpl implements TransformerManager {
     }
 
     @Override
-    public boolean tryInitialize(String transformerPipelineType) {
+    public boolean tryInitialize(Class<?> transformerPipelineType) {
         if (isInitialized) return false;
         isInitialized = true;
-        LOGGER.info("Initializing transformer pipeline using: {}", transformerPipelineType);
+        LOGGER.info("Initializing transformer pipeline using: {}", transformerPipelineType.getName());
         return true;
     }
 

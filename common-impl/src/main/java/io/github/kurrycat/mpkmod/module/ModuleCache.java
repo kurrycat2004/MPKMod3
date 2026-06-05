@@ -1,6 +1,6 @@
 package io.github.kurrycat.mpkmod.module;
 
-import io.github.kurrycat.mpkmod.api.minecraft.ModPlatform;
+import io.github.kurrycat.mpkmod.api.loader.ModPlatform;
 import io.github.kurrycat.mpkmod.util.FileUtil;
 
 import java.io.IOException;
