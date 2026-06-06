@@ -50,7 +50,7 @@ val generateFabricModJson by tasks.registering(GenerateModMetadata::class) {
 
 val generateForgeModToml by tasks.registering(GenerateModMetadata::class) {
     outputDir.set(layout.buildDirectory.dir("generated/resources/forge"))
-    relativeOutputPath.set("mods.toml")
+    relativeOutputPath.set("META-INF/mods.toml")
 
     content.set(metadata.map { meta ->
         """
@@ -77,15 +77,30 @@ val fabric by sourceSets.creating {
     resources.srcDir(generateFabricModJson.map { it.outputDir })
 }
 
+val commonForge by sourceSets.creating
+
 val forgeStubs by sourceSets.creating
 val forge by sourceSets.creating {
-    compileClasspath += forgeStubs.output
+    compileClasspath += forgeStubs.output + commonForge.output
     resources.srcDir(generateForgeModToml.map { it.outputDir })
+}
+
+val vintageForgeStubs by sourceSets.creating
+val vintageForge by sourceSets.creating {
+    compileClasspath += vintageForgeStubs.output + commonForge.output
+}
+
+val archaicForgeStubs by sourceSets.creating
+val archaicForge by sourceSets.creating {
+    compileClasspath += archaicForgeStubs.output + commonForge.output
 }
 
 val variants = listOf(
     fabric,
+    commonForge,
     forge,
+    vintageForge,
+    archaicForge,
 )
 
 repositories {
@@ -104,7 +119,9 @@ dependencies {
 
     fabric.compileOnly(this, libs.fabric.loader)
 
-    compileOnly("net.minecraftforge:forge:1.12.2-14.23.5.2864:universal")
+    commonForge.compileOnly(this, projects.commonApi)
+
+    forge.compileOnly(this, projects.injectModMetadata)
 }
 
 val mergeMetaTask by tasks.registering(MergeMetaTask::class) {

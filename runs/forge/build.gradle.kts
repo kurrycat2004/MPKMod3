@@ -4,7 +4,6 @@ import net.minecraftforge.gradle.ForgeGradleExtension
 import net.minecraftforge.gradle.MinecraftExtension
 import net.minecraftforge.gradle.MinecraftExtensionForProject
 import net.minecraftforge.gradle.shadow.net.minecraftforge.gradleutils.shared.ToolsExtension
-import java.util.jar.JarFile
 
 plugins {
     alias(libs.plugins.forge.gradle) apply false
@@ -64,15 +63,19 @@ runConfigurations.forge.forEach { forge ->
                     workingDir = file("../run/client/")
                     jvmArgs("-Dmpkmod.service.logProviders=true")
                     jvmArgs("-Dmpkmod.module.enableModuleLoadStacktrace=true")
+                    jvmArgs("-Dfml.coreMods.load=io.github.kurrycat.mpkmod.core.fml.FMLLoadingPlugin")
 
-                    val coreMods = mutableListOf<String>()
-                    configurations["runtimeClasspath"].forEach {
-                        if (it.extension != "jar") return@forEach
-                        val manifest = JarFile(it).manifest ?: return@forEach
-                        val coreMod = manifest.mainAttributes.getValue("FMLCorePlugin") ?: return@forEach
-                        coreMods.add(coreMod)
+                    val runtimeClasspath = configurations.named("runtimeClasspath")
+                    val bundle = runtimeClasspath.map {
+                        it.incoming.artifacts.artifacts.find { a ->
+                            val id = a.id.componentIdentifier
+                            id is ProjectComponentIdentifier && id.projectPath == bundleProject.path
+                        }!!.let { a ->
+                            mapOf("MOD_CLASSES" to a.file.path)
+                        }
                     }
-                    jvmArgs("-Dfml.coreMods.load=${coreMods.joinToString(",")}")
+
+                    environment(bundle)
                 }
                 /*register("server") {
                     args("--nogui", "fml_bug", "--port", 25565 + 189)
@@ -80,6 +83,10 @@ runConfigurations.forge.forEach { forge ->
                 }*/
             }
         }
+
+        /*tasks.named("runClient") {
+            dependsOn(project(bundleProject.path).tasks.named<Jar>("jar").map { it.archiveFile })
+        }*/
 
         /*extensions.configure<RenamerExtension> {
             mappings.from(extensions.getByType<MinecraftExtensionForProject>().dependency.toSrgFile)

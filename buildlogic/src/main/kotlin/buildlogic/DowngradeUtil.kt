@@ -26,6 +26,7 @@ fun Project.registerDowngradedJvmVariant(version: JavaVersion, classpath: Provid
 
     val shadedJar = tasks.register<ShadeJar>("shadeDowngradedJava${major}Jar") {
         inputFile.set(downgradedJar.flatMap { it.archiveFile })
+        shadePath.set { "io/github/kurrycat/mpkmod/shaded" }
         archiveClassifier.set("java$major-shaded")
     }
 

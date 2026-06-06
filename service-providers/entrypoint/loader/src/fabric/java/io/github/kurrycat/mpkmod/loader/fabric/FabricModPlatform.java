@@ -12,11 +12,11 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
 
-public class ModPlatformImpl implements ModPlatform {
+public class FabricModPlatform implements ModPlatform {
     @AutoService(ServiceProvider.class)
     public static final class Provider extends StandardServiceProvider<ModPlatform> {
         public Provider() {
-            super(ModPlatformImpl::new, ModPlatform.class);
+            super(FabricModPlatform::new, ModPlatform.class);
         }
 
         @Override
