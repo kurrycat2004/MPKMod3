@@ -64,7 +64,8 @@ runConfigurations.forge.forEach { forge ->
                     jvmArgs("-Dmpkmod.service.logProviders=true")
                     jvmArgs("-Dmpkmod.module.enableModuleLoadStacktrace=true")
                     jvmArgs("-Dfml.coreMods.load=io.github.kurrycat.mpkmod.core.fml.FMLLoadingPlugin")
-                    jvmArgs("-Djvmdg.debug.dumpClasses=true")
+                    //jvmArgs("-Djvmdg.debug.dumpClasses=true")
+                    //jvmArgs("-Djvmdg.debug=true")
 
                     val runtimeClasspath = configurations.named("runtimeClasspath")
                     val bundle = runtimeClasspath.map {
@@ -84,10 +85,6 @@ runConfigurations.forge.forEach { forge ->
                 }*/
             }
         }
-
-        /*tasks.named("runClient") {
-            dependsOn(project(bundleProject.path).tasks.named<Jar>("jar").map { it.archiveFile })
-        }*/
 
         /*extensions.configure<RenamerExtension> {
             mappings.from(extensions.getByType<MinecraftExtensionForProject>().dependency.toSrgFile)

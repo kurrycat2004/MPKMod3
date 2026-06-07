@@ -13,10 +13,9 @@ plugins {
     id("xyz.wagyourtail.jvmdowngrader")
 }
 
-val javaApiJar = configurations.create("javaApiJar") {
+val jvmdgJavaApi = configurations.create("jvmdgJavaApi") {
     isTransitive = false
 }
-val javaApiJarConfig = configurations.named(javaApiJar.name)
 val moduleJar = configurations.create("moduleJar")
 
 val embed = configurations.create("embed")
@@ -60,7 +59,7 @@ dependencies {
 
     moduleJar(projects.modules.main)
 
-    javaApiJar(libs.jvmdowngrader.java.api) {
+    jvmdgJavaApi(libs.jvmdowngrader.java.api) {
         artifact { classifier = "downgraded-8" }
     }
 
@@ -77,32 +76,41 @@ dependencies {
 
 tasks.jar { enabled = false }
 
-val mergeMetaTask = tasks.register<MergeMetaTask>("mergeMetaTask") {
-    mergeServices.set(false)
-    sourceJars.from(subproject)
+val javaApiShadowJar = tasks.register<ShadowJar>("javaApiShadowJar") {
+    group = "jvmdowngrader"
+    archiveBaseName = "java-api"
+    duplicatesStrategy = DuplicatesStrategy.INCLUDE
+    failOnDuplicateEntries = true
+
+    configurations = listOf(jvmdgJavaApi)
+    exclude("module-info.class")
+    relocate("org.objectweb.asm", "xyz.wagyourtail.jvmdg.shade.asm")
 }
 
-val jvmdowngraderShadowJar = tasks.register<ShadowJar>("jvmdowngraderShadowJar") {
+val jvmdgShadowJar = tasks.register<ShadowJar>("jvmdgShadowJar") {
     group = "jvmdowngrader"
     archiveBaseName = "jvmdowngrader"
     duplicatesStrategy = DuplicatesStrategy.INCLUDE
+    failOnDuplicateEntries = true
+
     configurations = listOf(jvmdowngrader)
-
     exclude("module-info.class")
-
-    relocate("org.objectweb.asm", "xyz.wagyourtail.jvmdg.shade.org.objectweb.asm")
+    relocate("org.objectweb.asm", "xyz.wagyourtail.jvmdg.shade.asm")
     /*minimize {
         include(dependency("org.ow2.asm:.*:.*"))
     }*/
+}
 
-    failOnDuplicateEntries = true
+val mergeMetaTask = tasks.register<MergeMetaTask>("mergeMetaTask") {
+    mergeServices.set(false)
+    sourceJars.from(subproject)
 }
 
 val shadowJarJava21 = tasks.register<ShadowJar>("shadowJarJava21") {
     duplicatesStrategy = DuplicatesStrategy.INCLUDE
     configurations = listOf(embed)
 
-    from(javaApiJar.incoming.files) {
+    from(javaApiShadowJar.map { it.archiveFile }) {
         into("META-INF/lib")
         rename { "java-api.jar" }
     }
@@ -117,7 +125,7 @@ val moduleJarsJava21 = configurations.named(moduleJar.name)
 val bundleJarJava21 = registerBundleJar(
     moduleJarsJava21,
     shadowJarJava21,
-    jvmdowngraderShadowJar,
+    jvmdgShadowJar,
     JavaVersion.VERSION_21
 )
 registerOutgoing(bundleJarJava21, JavaVersion.VERSION_21)
@@ -127,7 +135,7 @@ val shadowJarJava8 = downgradeTask(shadowJarJava21, JavaVersion.VERSION_1_8)
 val bundleJarJava8 = registerBundleJar(
     moduleJarsJava21,
     shadowJarJava8,
-    jvmdowngraderShadowJar,
+    jvmdgShadowJar,
     JavaVersion.VERSION_1_8
 )
 registerOutgoing(bundleJarJava8, JavaVersion.VERSION_1_8)
