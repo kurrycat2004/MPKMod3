@@ -11,18 +11,16 @@ public class MainModule implements IModule {
     public void onLoad(IModuleEntry entry, ILogger logger) {
         LOGGER = logger;
         LOGGER.info("Loading Main Module");
+       /* List<String> testList = List.of("test1", "test2");
+        LOGGER.info("TestList: {}", testList);*/
         Test test = new Test(1, 2);
         LOGGER.info("Test: " + test);
-        //LOGGER.info("RuntimeVersion: {}", Runtime.version());
-        /*List.of("a", "b", "c").forEach(
-                s -> LOGGER.info("Test: {}", s)
-        );*/
     }
-
-    record Test(int a, int b) {}
 
     @Override
     public void onUnload() {
 
     }
+
+    record Test(int a, int b) {}
 }

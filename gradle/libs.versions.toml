@@ -46,6 +46,8 @@ joml = { module = "org.joml:joml", version.ref = "joml" }
 jtoml = { module = "io.github.wasabithumb:jtoml", version.ref = "jtoml" }
 jtoml-serializer-reflect = { module = "io.github.wasabithumb:jtoml-serializer-reflect", version.ref = "jtoml" }
 jvmdowngrader = { module = "xyz.wagyourtail.jvmdowngrader:jvmdowngrader", version.ref = "jvmdowngrader" }
+jvmdowngrader-java-api = { module = "xyz.wagyourtail.jvmdowngrader:jvmdowngrader-java-api", version.ref = "jvmdowngrader" }
+jvmdowngrader-plugin = { module = "xyz.wagyourtail.jvmdowngrader:xyz.wagyourtail.jvmdowngrader.gradle.plugin", version.ref = "jvmdowngrader" }
 log4j-api = { module = "org.apache.logging.log4j:log4j-api", version.ref = "log4j" }
 lwjgl2 = { module = "org.lwjgl.lwjgl:lwjgl", version.ref = "lwjgl2" }
 lwjgl3 = { module = "org.lwjgl:lwjgl-opengl", version.ref = "lwjgl3" }

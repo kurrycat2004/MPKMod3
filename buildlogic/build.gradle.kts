@@ -16,4 +16,5 @@ dependencies {
     implementation(libs.jtoml)
     implementation(libs.jtoml.serializer.reflect)
     implementation(libs.shadow)
+    implementation(libs.jvmdowngrader.plugin)
 }

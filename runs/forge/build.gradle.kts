@@ -64,6 +64,7 @@ runConfigurations.forge.forEach { forge ->
                     jvmArgs("-Dmpkmod.service.logProviders=true")
                     jvmArgs("-Dmpkmod.module.enableModuleLoadStacktrace=true")
                     jvmArgs("-Dfml.coreMods.load=io.github.kurrycat.mpkmod.core.fml.FMLLoadingPlugin")
+                    jvmArgs("-Djvmdg.debug.dumpClasses=true")
 
                     val runtimeClasspath = configurations.named("runtimeClasspath")
                     val bundle = runtimeClasspath.map {
