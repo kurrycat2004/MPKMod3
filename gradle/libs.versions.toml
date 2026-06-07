@@ -16,6 +16,7 @@ jvmdowngrader = "1.4.0-SNAPSHOT"
 lwjgl3 = "3.4.1"
 mixin = "0.8.7"
 retrofuturagradle = "2.0.2"
+shadow = "9.4.2"
 
 # Version locked for legacy
 asm4 = "4.1"
@@ -51,6 +52,7 @@ lwjgl3 = { module = "org.lwjgl:lwjgl-opengl", version.ref = "lwjgl3" }
 mixin = { module = "org.spongepowered:mixin", version.ref = "mixin" }
 modlauncher = { module = "cpw.mods:modlauncher", version.ref = "modlauncher" }
 slf4j-api = { module = "org.slf4j:slf4j-api", version.ref = "slf4j" }
+shadow = { module = "com.gradleup.shadow:com.gradleup.shadow.gradle.plugin", version.ref = "shadow" }
 
 [bundles]
 asm = ["asm", "asm-tree", "asm-commons"]
@@ -64,3 +66,4 @@ forge-gradle = { id = "net.minecraftforge.gradle", version.ref = "forge-gradle" 
 forge-renamer = { id = "net.minecraftforge.renamer", version.ref = "forge-renamer" }
 jvmdowngrader = { id = "xyz.wagyourtail.jvmdowngrader", version.ref = "jvmdowngrader" }
 retrofuturagradle = { id = "com.gtnewhorizons.retrofuturagradle", version.ref = "retrofuturagradle" }
+shadow = { id = "com.gradleup.shadow", version.ref = "shadow" }

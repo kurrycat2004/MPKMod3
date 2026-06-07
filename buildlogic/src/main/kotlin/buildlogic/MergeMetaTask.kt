@@ -4,8 +4,10 @@ import org.gradle.api.DefaultTask
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.CopySpec
 import org.gradle.api.file.DirectoryProperty
+import org.gradle.api.provider.Property
 import org.gradle.api.tasks.CacheableTask
 import org.gradle.api.tasks.Classpath
+import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.PathSensitive
@@ -25,6 +27,12 @@ abstract class MergeMetaTask : DefaultTask() {
     @get:PathSensitive(PathSensitivity.RELATIVE)
     abstract val sourceRoots: ConfigurableFileCollection
 
+    @get:Input
+    abstract val mergeServices: Property<Boolean>
+
+    @get:Input
+    abstract val mergeManifests: Property<Boolean>
+
     @get:Classpath
     abstract val sourceJars: ConfigurableFileCollection
 
@@ -32,21 +40,27 @@ abstract class MergeMetaTask : DefaultTask() {
     abstract val outputDir: DirectoryProperty
 
     init {
+        mergeServices.convention(true)
+        mergeManifests.convention(true)
         outputDir.convention(project.layout.buildDirectory.dir("generated/mergedMeta/${name}"))
     }
 
     @TaskAction
     fun merge() {
         val root = outputDir.get().asFile
-        val servicesRoot = root.resolve("META-INF/services")
-        val manifestOut = root.resolve("META-INF/MANIFEST.MF")
-
         root.deleteRecursively()
-        servicesRoot.mkdirs()
-        manifestOut.parentFile.mkdirs()
 
-        mergeServices(servicesRoot)
-        mergeManifests(manifestOut)
+        if (mergeServices.get()) {
+            val servicesRoot = root.resolve("META-INF/services")
+            servicesRoot.mkdirs()
+            mergeServices(servicesRoot)
+        }
+
+        if (mergeManifests.get()) {
+            val manifestOut = root.resolve("META-INF/MANIFEST.MF")
+            manifestOut.parentFile.mkdirs()
+            mergeManifests(manifestOut)
+        }
     }
 
     private fun mergeServices(servicesRoot: File) {
@@ -158,11 +172,17 @@ abstract class MergeMetaTask : DefaultTask() {
 }
 
 fun Jar.mergeMeta(mergeMetaTask: TaskProvider<MergeMetaTask>) {
-    from(mergeMetaTask) {
-        include("META-INF/services/**")
+    dependsOn(mergeMetaTask)
+
+    if (mergeMetaTask.get().mergeServices.get()) {
+        from(mergeMetaTask) {
+            include("META-INF/services/**")
+        }
     }
-    manifest {
-        from(mergeMetaTask.map { it.outputDir.file("META-INF/MANIFEST.MF") }.get())
+    if (mergeMetaTask.get().mergeManifests.get()) {
+        manifest {
+            from(mergeMetaTask.map { it.outputDir.file("META-INF/MANIFEST.MF") }.get())
+        }
     }
 }
 

@@ -15,10 +15,5 @@ dependencies {
     implementation(libs.commons.compress)
     implementation(libs.jtoml)
     implementation(libs.jtoml.serializer.reflect)
-
-    implementation(
-        libs.plugins.jvmdowngrader.map {
-            "${it.pluginId}:${it.pluginId}.gradle.plugin:${it.version.requiredVersion}"
-        }
-    )
+    implementation(libs.shadow)
 }
