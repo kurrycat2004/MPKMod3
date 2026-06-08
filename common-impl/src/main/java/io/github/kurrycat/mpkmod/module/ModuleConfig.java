@@ -1,7 +1,6 @@
 package io.github.kurrycat.mpkmod.module;
 
 import io.github.kurrycat.mpkmod.api.module.IVersion;
-import io.github.kurrycat.mpkmod.api.module.IVersionConstraint;
 import io.github.kurrycat.mpkmod.api.module.InvalidVersionConstraintException;
 import io.github.kurrycat.mpkmod.util.FileUtil;
 import io.github.wasabithumb.jtoml.JToml;
@@ -128,7 +127,7 @@ public final class ModuleConfig {
 
         TomlTable dependencyTable = getTable(table, DEPENDENCIES, false, errors);
         Set<TomlKey> depKeys = dependencyTable == null ? Collections.emptySet() : dependencyTable.keys();
-        Map<String, IVersionConstraint> dependencies = new HashMap<>();
+        Map<String, IVersion.Constraint> dependencies = new HashMap<>();
         for (TomlKey depKey : depKeys) {
             String depId = depKey.toString();
             if (!VALID_ID_PATTERN.matcher(depId).matches()) {

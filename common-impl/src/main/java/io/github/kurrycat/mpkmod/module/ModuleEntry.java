@@ -2,7 +2,6 @@ package io.github.kurrycat.mpkmod.module;
 
 import io.github.kurrycat.mpkmod.api.module.IModuleEntry;
 import io.github.kurrycat.mpkmod.api.module.IVersion;
-import io.github.kurrycat.mpkmod.api.module.IVersionConstraint;
 
 import java.nio.file.Path;
 import java.util.Collections;
@@ -20,7 +19,7 @@ public record ModuleEntry(
         String sources,
         String license,
         Path icon,
-        Map<String, IVersionConstraint> dependencies
+        Map<String, IVersion.Constraint> dependencies
 ) implements IModuleEntry {
     public ModuleEntry {
         Objects.requireNonNull(id, "displayName cannot be null");

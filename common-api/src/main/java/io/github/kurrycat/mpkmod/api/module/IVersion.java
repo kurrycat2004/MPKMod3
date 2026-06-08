@@ -1,5 +1,11 @@
 package io.github.kurrycat.mpkmod.api.module;
 
 public interface IVersion extends Comparable<IVersion> {
-    boolean satisfies(IVersionConstraint range);
+    default boolean satisfies(Constraint range) {
+        return range.isSatisfiedBy(this);
+    }
+
+    interface Constraint {
+        boolean isSatisfiedBy(IVersion version);
+    }
 }

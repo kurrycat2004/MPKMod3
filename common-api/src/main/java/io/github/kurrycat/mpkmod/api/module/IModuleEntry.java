@@ -23,5 +23,5 @@ public interface IModuleEntry {
 
     Path icon();
 
-    Map<String, IVersionConstraint> dependencies();
+    Map<String, IVersion.Constraint> dependencies();
 }

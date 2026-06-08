@@ -1,10 +1,10 @@
 package io.github.kurrycat.mpkmod.modules.main;
 
 import io.github.kurrycat.mpkmod.api.log.ILogger;
-import io.github.kurrycat.mpkmod.api.module.IModule;
+import io.github.kurrycat.mpkmod.api.module.ModuleEntrypoint;
 import io.github.kurrycat.mpkmod.api.module.IModuleEntry;
 
-public class MainModule implements IModule {
+public class MainModule implements ModuleEntrypoint {
     public static ILogger LOGGER;
 
     @Override

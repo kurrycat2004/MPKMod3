@@ -2,7 +2,7 @@ package io.github.kurrycat.mpkmod.api.module;
 
 import io.github.kurrycat.mpkmod.api.log.ILogger;
 
-public interface IModule {
+public interface ModuleEntrypoint {
     /**
      * Called once when the module is loaded. <br>
      * Note that on reload this will be called on a fresh instance of the module <br>

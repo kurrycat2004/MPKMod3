@@ -1,7 +1,6 @@
 package io.github.kurrycat.mpkmod.module;
 
 import io.github.kurrycat.mpkmod.api.module.IVersion;
-import io.github.kurrycat.mpkmod.api.module.IVersionConstraint;
 import io.github.kurrycat.mpkmod.api.module.InvalidVersionConstraintException;
 import org.jetbrains.annotations.NotNull;
 
@@ -30,11 +29,6 @@ public record SemVer(int major, int minor, int patch) implements IVersion {
     }
 
     @Override
-    public boolean satisfies(IVersionConstraint range) {
-        return range.isSatisfiedBy(this);
-    }
-
-    @Override
     public int compareTo(@NotNull IVersion o) {
         if (!(o instanceof SemVer(int major1, int minor1, int patch1))) {
             throw new IllegalArgumentException("Cannot compare with non-SemVer implementation");
@@ -53,7 +47,7 @@ public record SemVer(int major, int minor, int patch) implements IVersion {
     public record Constraint(
             SemVer version,
             Operator operator
-    ) implements IVersionConstraint {
+    ) implements IVersion.Constraint {
         public Constraint {
             if (version == null) throw new IllegalArgumentException("Version cannot be null");
             if (operator == null) throw new IllegalArgumentException("Operator cannot be null");
@@ -77,7 +71,7 @@ public record SemVer(int major, int minor, int patch) implements IVersion {
             EQUAL("==", (self, other) -> self.compareTo(other) == 0),
             ;
 
-            public static final Operator[] VALUES = values();
+            private static final Operator[] VALUES = values();
 
             private final String symbol;
             private final IVersionOperator operator;
@@ -103,7 +97,7 @@ public record SemVer(int major, int minor, int patch) implements IVersion {
         }
     }
 
-    public record ConstraintSet(List<Constraint> constraints) implements IVersionConstraint {
+    public record ConstraintSet(List<Constraint> constraints) implements IVersion.Constraint {
         public static ConstraintSet parse(String constraints) throws InvalidVersionConstraintException {
             String[] clauses = constraints.split(" ");
             List<Constraint> constraintList = new ArrayList<>();

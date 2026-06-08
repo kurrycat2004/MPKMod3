@@ -2,8 +2,8 @@ package io.github.kurrycat.mpkmod.module;
 
 import com.google.auto.service.AutoService;
 import io.github.kurrycat.mpkmod.api.log.ILogger;
-import io.github.kurrycat.mpkmod.api.module.IModule;
-import io.github.kurrycat.mpkmod.api.module.IVersionConstraint;
+import io.github.kurrycat.mpkmod.api.module.IVersion;
+import io.github.kurrycat.mpkmod.api.module.ModuleEntrypoint;
 import io.github.kurrycat.mpkmod.api.module.ModuleRegistry;
 import io.github.kurrycat.mpkmod.api.service.ServiceProvider;
 import io.github.kurrycat.mpkmod.api.service.StandardServiceProvider;
@@ -15,6 +15,7 @@ import xyz.wagyourtail.jvmdg.ClassDowngrader;
 import xyz.wagyourtail.jvmdg.classloader.DowngradingClassLoader;
 
 import java.io.Closeable;
+import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -107,9 +108,9 @@ public final class ModuleRegistryImpl implements ModuleRegistry {
                 Map.Entry<String, DiscoveredModule> entry = iterator.next();
                 DiscoveredModule module = entry.getValue();
 
-                for (Map.Entry<String, IVersionConstraint> depEntry : module.entry().dependencies().entrySet()) {
+                for (Map.Entry<String, IVersion.Constraint> depEntry : module.entry().dependencies().entrySet()) {
                     String depId = depEntry.getKey();
-                    IVersionConstraint depVersion = depEntry.getValue();
+                    IVersion.Constraint depVersion = depEntry.getValue();
                     LoadedModule loaded = loadedModules.get(depId);
 
                     if (loaded == null) {
@@ -136,6 +137,11 @@ public final class ModuleRegistryImpl implements ModuleRegistry {
                     loadedModules.put(loadedModule.entry().id(), loadedModule);
                 } catch (ModuleLoadException e) {
                     errorModules.put(module.source(), module.withError(e));
+                } catch (Exception e) {
+                    ModuleLoadException exception = new ModuleLoadException.Builder("Unexpected error while trying to load module: " + module.entry().id())
+                            .addError(e)
+                            .build();
+                    errorModules.put(module.source(), module.withError(exception));
                 }
             }
         }
@@ -186,69 +192,67 @@ public final class ModuleRegistryImpl implements ModuleRegistry {
         }
     }
 
-    private static LoadedModule loadModule(Map<String, LoadedModule> loadedModules, DiscoveredModule module) throws ModuleLoadException {
+    private static LoadedModule loadModule(Map<String, LoadedModule> loadedModules, DiscoveredModule module) throws ModuleLoadException, IOException {
         CachedModule cachedModule = ModuleCache.getOrCreateCachedModule(module);
         FileUtil.tryCloseJar(module.source());
 
+        List<ClassLoader> dependencyClassLoaders = new ArrayList<>();
+        for (String depId : cachedModule.entry().dependencies().keySet()) {
+            LoadedModule depModule = loadedModules.get(depId);
+            dependencyClassLoaders.add(depModule.classLoader());
+        }
+
+        ClassLoader parent = buildClassLoaderHierarchy(dependencyClassLoaders);
+        DowngradingClassLoader loader = new DowngradingClassLoader(ClassDowngrader.getCurrentVersionDowngrader(), parent);
+        loader.addDelegate(new URL[] { cachedModule.source().toUri().toURL() });
+
+        Class<?> entrypointClass;
         try {
-            List<ClassLoader> dependencyClassLoaders = new ArrayList<>();
-            for (String depId : cachedModule.entry().dependencies().keySet()) {
-                LoadedModule depModule = loadedModules.get(depId);
-                dependencyClassLoaders.add(depModule.classLoader());
-            }
-
-            ClassLoader parent = buildClassLoaderHierarchy(dependencyClassLoaders);
-            DowngradingClassLoader loader = new DowngradingClassLoader(ClassDowngrader.getCurrentVersionDowngrader(), parent);
-            loader.addDelegate(new URL[] { cachedModule.source().toUri().toURL() });
-
-            Class<?> entrypointClass;
-            try {
-                entrypointClass = loader.loadClass(cachedModule.entry().entrypoint());
-            } catch (ClassNotFoundException e) {
-                throw new ModuleLoadException.Builder("Invalid entrypoint class for module " + cachedModule.entry().id())
-                        .addError(e)
-                        .build();
-            }
-
-            if (!IModule.class.isAssignableFrom(entrypointClass)) {
-                throw new ModuleLoadException.Builder("Invalid entrypoint class for module " + cachedModule.entry().id())
-                        .addError("Entrypoint class: " + entrypointClass.getName() + " does not implement IModule")
-                        .build();
-            }
-
-            @SuppressWarnings("unchecked")
-            Class<? extends IModule> moduleClass = (Class<? extends IModule>) entrypointClass;
-
-            IModule moduleInstance;
-            try {
-                moduleInstance = moduleClass.getDeclaredConstructor().newInstance();
-            } catch (NoSuchMethodException e) {
-                throw new ModuleLoadException.Builder("Invalid entrypoint class for module " + cachedModule.entry().id())
-                        .addError("Entrypoint class: " + entrypointClass.getName() + " does not have a no-arg constructor")
-                        .build();
-            }
-
-            ILogger logger = MODULE_LOGGER.createSubLogger(cachedModule.entry().id());
-            try {
-                moduleInstance.onLoad(cachedModule.entry(), logger);
-            } catch (Throwable e) {
-                throw new ModuleLoadException.Builder("Invalid entrypoint class for module " + cachedModule.entry().id())
-                        .addError("onLoad() threw an error", e)
-                        .build();
-            }
-
-            return new LoadedModule(
-                    cachedModule.source(),
-                    cachedModule.sourceHash(),
-                    cachedModule.entry(),
-                    loader,
-                    moduleInstance
-            );
-        } catch (Exception e) {
-            throw new ModuleLoadException.Builder("Unexpected error while trying to load module: " + cachedModule.entry().id())
+            entrypointClass = loader.loadClass(cachedModule.entry().entrypoint());
+        } catch (ClassNotFoundException e) {
+            throw new ModuleLoadException.Builder("Invalid entrypoint class for module " + cachedModule.entry().id())
                     .addError(e)
                     .build();
         }
+
+        if (!ModuleEntrypoint.class.isAssignableFrom(entrypointClass)) {
+            throw new ModuleLoadException.Builder("Invalid entrypoint class for module " + cachedModule.entry().id())
+                    .addError("Entrypoint class: " + entrypointClass.getName() + " does not implement " + ModuleEntrypoint.class.getName())
+                    .build();
+        }
+
+        @SuppressWarnings("unchecked")
+        Class<? extends ModuleEntrypoint> moduleClass = (Class<? extends ModuleEntrypoint>) entrypointClass;
+
+        ModuleEntrypoint moduleInstance;
+        try {
+            moduleInstance = moduleClass.getDeclaredConstructor().newInstance();
+        } catch (NoSuchMethodException e) {
+            throw new ModuleLoadException.Builder("Invalid entrypoint class for module " + cachedModule.entry().id())
+                    .addError("Entrypoint class: " + entrypointClass.getName() + " does not have a no-arg constructor")
+                    .build();
+        } catch (Exception e) {
+            throw new ModuleLoadException.Builder("Invalid entrypoint class for module " + cachedModule.entry().id())
+                    .addError("Entrypoint class: " + entrypointClass.getName() + " threw an exception during initialization", e)
+                    .build();
+        }
+
+        ILogger logger = MODULE_LOGGER.createSubLogger(cachedModule.entry().id());
+        try {
+            moduleInstance.onLoad(cachedModule.entry(), logger);
+        } catch (Exception e) {
+            throw new ModuleLoadException.Builder("Invalid entrypoint class for module " + cachedModule.entry().id())
+                    .addError("onLoad() threw an error", e)
+                    .build();
+        }
+
+        return new LoadedModule(
+                cachedModule.source(),
+                cachedModule.sourceHash(),
+                cachedModule.entry(),
+                loader,
+                moduleInstance
+        );
     }
 
     private static ClassLoader buildClassLoaderHierarchy(List<ClassLoader> parents) {

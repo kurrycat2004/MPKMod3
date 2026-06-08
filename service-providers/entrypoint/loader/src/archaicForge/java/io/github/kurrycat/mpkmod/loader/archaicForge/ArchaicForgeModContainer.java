@@ -8,8 +8,8 @@ import cpw.mods.fml.common.LoadController;
 import cpw.mods.fml.common.ModMetadata;
 import cpw.mods.fml.common.event.FMLInitializationEvent;
 import io.github.kurrycat.mpkmod.api.App;
+import io.github.kurrycat.mpkmod.api.entrypoint.ModLifecycle;
 import io.github.kurrycat.mpkmod.api.loader.ForgeModContainer;
-import io.github.kurrycat.mpkmod.api.loader.ModPlatform;
 import io.github.kurrycat.mpkmod.api.service.ServiceProvider;
 import io.github.kurrycat.mpkmod.api.service.StandardServiceProvider;
 import io.github.kurrycat.mpkmod.loader.commonForge.CommonForgeEntrypoint;
@@ -85,7 +85,7 @@ public final class ArchaicForgeModContainer implements ForgeModContainer {
 
         @Subscribe
         public void onInitialize(FMLInitializationEvent ignored) {
-            ModPlatform.HANDLE.get().init();
+            ModLifecycle.HANDLE.get().init();
         }
     }
 }

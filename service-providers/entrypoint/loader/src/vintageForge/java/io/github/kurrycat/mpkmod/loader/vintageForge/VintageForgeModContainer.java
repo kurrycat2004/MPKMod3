@@ -4,8 +4,8 @@ import com.google.auto.service.AutoService;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 import io.github.kurrycat.mpkmod.api.App;
+import io.github.kurrycat.mpkmod.api.entrypoint.ModLifecycle;
 import io.github.kurrycat.mpkmod.api.loader.ForgeModContainer;
-import io.github.kurrycat.mpkmod.api.loader.ModPlatform;
 import io.github.kurrycat.mpkmod.api.service.ServiceProvider;
 import io.github.kurrycat.mpkmod.api.service.StandardServiceProvider;
 import io.github.kurrycat.mpkmod.loader.commonForge.CommonForgeEntrypoint;
@@ -88,7 +88,7 @@ public final class VintageForgeModContainer implements ForgeModContainer {
 
         @Subscribe
         public void onInitialize(FMLInitializationEvent ignored) {
-            ModPlatform.HANDLE.get().init();
+            ModLifecycle.HANDLE.get().init();
         }
     }
 }

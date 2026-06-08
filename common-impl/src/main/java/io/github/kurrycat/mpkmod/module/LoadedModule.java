@@ -1,6 +1,6 @@
 package io.github.kurrycat.mpkmod.module;
 
-import io.github.kurrycat.mpkmod.api.module.IModule;
+import io.github.kurrycat.mpkmod.api.module.ModuleEntrypoint;
 
 import java.nio.file.Path;
 
@@ -9,7 +9,7 @@ public record LoadedModule(
         String sourceHash,
         ModuleEntry entry,
         ClassLoader classLoader,
-        IModule moduleInstance
+        ModuleEntrypoint moduleInstance
 ) {
     public boolean matchesExactly(DiscoveredModule module) {
         return !module.isError() && sourceHash.equals(module.sourceHash());

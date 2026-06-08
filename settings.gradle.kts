@@ -39,7 +39,7 @@ include("common-impl")
 include("inject-mod-metadata")
 include("service-providers:log")
 include("service-providers:lwjgl")
-include("service-providers:transformer")
+//include("service-providers:transformer")
 include("service-providers:entrypoint:transformer")
 include("service-providers:entrypoint:loader")
 

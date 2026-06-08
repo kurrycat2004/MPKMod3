@@ -1,8 +1,6 @@
 package io.github.kurrycat.mpkmod.api.loader;
 
 import io.github.kurrycat.mpkmod.api.App;
-import io.github.kurrycat.mpkmod.api.log.ILogger;
-import io.github.kurrycat.mpkmod.api.module.ModuleRegistry;
 import io.github.kurrycat.mpkmod.api.service.ServiceHandle;
 import io.github.kurrycat.mpkmod.api.service.Services;
 
@@ -13,18 +11,19 @@ import java.util.List;
 public interface ModPlatform {
     ServiceHandle<ModPlatform> HANDLE = Services.getHandle(ModPlatform.class);
 
-    ILogger LOGGER = ILogger.createLogger(ModPlatform.class.getSimpleName());
-
-    default void init() {
-        LOGGER.info("Initializing {} ({}) ModPlatform for loader({}), mc_version({})",
-                App.name(), App.id(), loader(), mcVersion()
-        );
-
-        ModuleRegistry.HANDLE.get().loadAllModules();
-    }
-
+    /**
+     * Get the loader with which the mod was loaded.<br>
+     * Example: {@code "fabric"}
+     *
+     * @return a label specifying the loader used to load this mod
+     */
     String loader();
 
+    /**
+     * Get the version of the currently running Minecraft instance.
+     *
+     * @return the version of the current Minecraft instance
+     */
     String mcVersion();
 
     /**
