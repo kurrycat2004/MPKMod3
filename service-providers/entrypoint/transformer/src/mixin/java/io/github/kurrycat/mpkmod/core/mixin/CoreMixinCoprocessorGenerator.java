@@ -46,6 +46,7 @@ import org.objectweb.asm.Opcodes;
  * }</pre>
  */
 public class CoreMixinCoprocessorGenerator implements Opcodes {
+    @SuppressWarnings("CommentedOutCode")
     public static byte[] generate() {
         ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_FRAMES | ClassWriter.COMPUTE_MAXS);
         String className = "org/spongepowered/asm/mixin/transformer/CoreMixinCoprocessor";

@@ -17,7 +17,7 @@ import java.util.Collections;
 import java.util.List;
 
 public class CommonForgeEntrypoint {
-    public static CommonForgeEntrypoint INSTANCE = new CommonForgeEntrypoint();
+    public static final CommonForgeEntrypoint INSTANCE = new CommonForgeEntrypoint();
 
     private final File source = findSource();
     private final List<Path> rootPaths = findRootPaths(source.toPath());

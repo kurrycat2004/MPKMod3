@@ -119,8 +119,6 @@ dependencies {
 
     fabric.compileOnly(this, libs.fabric.loader)
 
-    commonForge.compileOnly(this, projects.commonApi)
-
     forge.compileOnly(this, projects.injectModMetadata)
 }
 

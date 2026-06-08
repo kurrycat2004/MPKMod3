@@ -203,6 +203,7 @@ fun registerOutgoing(task: TaskProvider<out Task>, javaVersion: JavaVersion) {
 }
 
 fun Configuration.sources() = incoming.artifactView {
+    @Suppress("UnstableApiUsage")
     withVariantReselection()
     attributes {
         attribute(DocsType.DOCS_TYPE_ATTRIBUTE, objects.named(DocsType.SOURCES))
