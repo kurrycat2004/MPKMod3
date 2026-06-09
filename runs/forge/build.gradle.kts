@@ -69,6 +69,7 @@ runConfigurations.forge.forEach { forge ->
 
                     val runtimeClasspath = configurations.named("runtimeClasspath")
                     val bundle = runtimeClasspath.map {
+                        it.incoming.artifacts.artifacts.forEach { f -> println(f) }
                         it.incoming.artifacts.artifacts.find { a ->
                             val id = a.id.componentIdentifier
                             id is ProjectComponentIdentifier && id.projectPath == bundleProject.path

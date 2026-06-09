@@ -18,6 +18,10 @@ fun SourceSet.annotationProcessor(dependencies: DependencyHandlerScope, vararg d
     deps.forEach { dependencies.add(annotationProcessorConfigurationName, it) }
 }
 
+fun SourceSet.implementation(dependencies: DependencyHandlerScope, vararg deps: Any) {
+    deps.forEach { dependencies.add(implementationConfigurationName, it) }
+}
+
 
 fun <K, V> json(vararg pairs: Pair<K, V>): String =
     JsonOutput.prettyPrint(JsonOutput.toJson(mapOf(*pairs)))

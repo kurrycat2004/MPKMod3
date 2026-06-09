@@ -2,7 +2,10 @@ package io.github.kurrycat.mpkmod.core.mixin;
 
 import io.github.kurrycat.mpkmod.api.log.ILogger;
 import io.github.kurrycat.mpkmod.api.transformer.Transformer;
+import io.github.kurrycat.mpkmod.api.transformer.TransformerContext;
 import io.github.kurrycat.mpkmod.api.transformer.TransformerManager;
+import org.objectweb.asm.ClassReader;
+import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.asm.mixin.MixinEnvironment;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
@@ -22,6 +25,10 @@ public final class CoreMixinPlugin implements IMixinConfigPlugin {
     public void onLoad(String mixinPackage) {
         final TransformerManager transformerManager = TransformerManager.HANDLE.get();
         if (transformerManager.isInitialized()) return;
+
+        @SuppressWarnings("unused")
+        MixinTransformerContext forceInit = new MixinTransformerContext("");
+
         try {
             ClassLoader classLoader = MixinEnvironment
                     .getCurrentEnvironment()
@@ -49,12 +56,60 @@ public final class CoreMixinPlugin implements IMixinConfigPlugin {
         }
     }
 
+    private record MixinTransformerContext(
+            String binaryClassName,
+            String internalClassName
+    ) implements TransformerContext {
+        public MixinTransformerContext(String binaryClassName) {
+            this(binaryClassName, binaryClassName.replace('.', '/'));
+        }
+    }
+
     public static boolean tryTransform(String className, ClassNode input) {
-        return TransformerManager.HANDLE.get().tryTransform(className, input);
+        final TransformerManager transformerManager = TransformerManager.HANDLE.get();
+        TransformerContext transformerContext = new MixinTransformerContext(className);
+
+        ClassWriter writer = new ClassWriter(ClassWriter.COMPUTE_MAXS);
+        input.accept(writer);
+        byte[] classBytes = writer.toByteArray();
+
+        byte[] newClassBytes = transformerManager.transform(transformerContext, classBytes);
+
+        if (newClassBytes == null || newClassBytes == classBytes) {
+            return false;
+        }
+
+        ClassReader reader = new ClassReader(classBytes);
+
+        ClassNode replacement = new ClassNode();
+        reader.accept(replacement, 0);
+
+        input.version = replacement.version;
+        input.access = replacement.access;
+        input.name = replacement.name;
+        input.signature = replacement.signature;
+        input.superName = replacement.superName;
+        input.interfaces = replacement.interfaces;
+        input.sourceFile = replacement.sourceFile;
+        input.sourceDebug = replacement.sourceDebug;
+        input.outerClass = replacement.outerClass;
+        input.outerMethod = replacement.outerMethod;
+        input.outerMethodDesc = replacement.outerMethodDesc;
+        input.visibleAnnotations = replacement.visibleAnnotations;
+        input.invisibleAnnotations = replacement.invisibleAnnotations;
+        input.visibleTypeAnnotations = replacement.visibleTypeAnnotations;
+        input.invisibleTypeAnnotations = replacement.invisibleTypeAnnotations;
+        input.attrs = replacement.attrs;
+        input.innerClasses = replacement.innerClasses;
+        input.fields = replacement.fields;
+        input.methods = replacement.methods;
+
+        return true;
     }
 
     public static boolean shouldTransform(String className) {
-        return TransformerManager.HANDLE.get().shouldTransform(className);
+        TransformerContext transformerContext = new MixinTransformerContext(className);
+        return TransformerManager.HANDLE.get().shouldTransform(transformerContext);
     }
 
     @SuppressWarnings("unchecked")
@@ -67,19 +122,17 @@ public final class CoreMixinPlugin implements IMixinConfigPlugin {
         coprocessors.add((T) coreCoProcessor);
     }
 
+    private static final String MIXIN_TRANSFORMER = "org.spongepowered.asm.mixin.transformer.MixinTransformer";
+    private static final String MIXIN_PROCESSOR = "org.spongepowered.asm.mixin.transformer.MixinProcessor";
+    private static final String MIXIN_COPROCESSOR = "org.spongepowered.asm.mixin.transformer.MixinCoprocessor";
+
     private static List<?> getCoProcessorList(ClassLoader classLoader) throws NoSuchFieldException, IllegalAccessException, ClassNotFoundException {
-        Class<?> mixinTransformerClass = Class.forName(
-                "org.spongepowered.asm.mixin.transformer.MixinTransformer",
-                true, classLoader
-        );
+        Class<?> mixinTransformerClass = Class.forName(MIXIN_TRANSFORMER, true, classLoader);
 
         Field procField = mixinTransformerClass.getDeclaredField("processor");
         procField.setAccessible(true);
 
-        Class<?> mixinProcessorClass = Class.forName(
-                "org.spongepowered.asm.mixin.transformer.MixinProcessor",
-                true, classLoader
-        );
+        Class<?> mixinProcessorClass = Class.forName(MIXIN_PROCESSOR, true, classLoader);
 
         Field coprocsField = mixinProcessorClass.getDeclaredField("coprocessors");
         coprocsField.setAccessible(true);
@@ -98,7 +151,7 @@ public final class CoreMixinPlugin implements IMixinConfigPlugin {
     private static Class<?> generateCoProcClass(ClassLoader classLoader) throws ReflectiveOperationException {
         byte[] coreCoProcBytecode = CoreMixinCoprocessorGenerator.generate();
         MethodHandles.Lookup lookup = MethodHandles.privateLookupIn(
-                Class.forName("org.spongepowered.asm.mixin.transformer.MixinCoprocessor", true, classLoader),
+                Class.forName(MIXIN_COPROCESSOR, true, classLoader),
                 MethodHandles.lookup()
         );
         return lookup.defineClass(coreCoProcBytecode);

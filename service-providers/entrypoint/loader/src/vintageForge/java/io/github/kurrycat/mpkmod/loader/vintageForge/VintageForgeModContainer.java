@@ -28,8 +28,8 @@ public final class VintageForgeModContainer implements ForgeModContainer {
 
         @Override
         public Optional<String> invalidReason() {
-            if (!isClassLoaded("net.minecraftforge.fml.common.DummyModContainer")) {
-                return Optional.of("net.minecraftforge.fml ModContainer not found");
+            if (!isClassLoaded("net.minecraftforge.fml.relauncher.CoreModManager")) {
+                return Optional.of("net.minecraftforge.fml CoreModManager not found");
             }
             return super.invalidReason();
         }

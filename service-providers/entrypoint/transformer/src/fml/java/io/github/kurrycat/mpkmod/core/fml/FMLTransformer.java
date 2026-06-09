@@ -2,11 +2,9 @@ package io.github.kurrycat.mpkmod.core.fml;
 
 import io.github.kurrycat.mpkmod.api.log.ILogger;
 import io.github.kurrycat.mpkmod.api.transformer.Transformer;
+import io.github.kurrycat.mpkmod.api.transformer.TransformerContext;
 import io.github.kurrycat.mpkmod.api.transformer.TransformerManager;
 import net.minecraft.launchwrapper.IClassTransformer;
-import org.objectweb.asm.ClassReader;
-import org.objectweb.asm.ClassWriter;
-import org.objectweb.asm.tree.ClassNode;
 
 /// Used in {@link FMLLoadingPlugin#getASMTransformerClass()}
 public final class FMLTransformer implements IClassTransformer {
@@ -26,22 +24,26 @@ public final class FMLTransformer implements IClassTransformer {
         }
     }
 
+    public FMLTransformer() {
+        @SuppressWarnings("unused")
+        FMLTransformerContext forceInit = new FMLTransformerContext("");
+    }
+
+    private record FMLTransformerContext(
+            String binaryClassName,
+            String internalClassName
+    ) implements TransformerContext {
+        public FMLTransformerContext(String binaryClassName) {
+            this(binaryClassName, binaryClassName.replace('.', '/'));
+        }
+    }
+
     @Override
-    public byte[] transform(String name, String transformedName, byte[] basicClass) {
-        if (basicClass == null) return null;
+    public byte[] transform(String name, String transformedName, byte[] classBytes) {
+        if (classBytes == null) return null;
         final TransformerManager transformerManager = TransformerManager.HANDLE.get();
 
-        if (!transformerManager.shouldTransform(transformedName)) return basicClass;
-
-        ClassReader reader = new ClassReader(basicClass);
-        ClassNode classNode = new ClassNode();
-        reader.accept(classNode, 0);
-
-        boolean changed = transformerManager.transform(classNode);
-        if (!changed) return basicClass;
-
-        ClassWriter writer = new ClassWriter(ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES);
-        classNode.accept(writer);
-        return writer.toByteArray();
+        FMLTransformerContext transformerContext = new FMLTransformerContext(transformedName);
+        return transformerManager.transform(transformerContext, classBytes);
     }
 }

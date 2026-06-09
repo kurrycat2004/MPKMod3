@@ -2,6 +2,7 @@ import buildlogic.MergeMetaTask
 import buildlogic.annotationProcessor
 import buildlogic.compileOnly
 import buildlogic.excludeMeta
+import buildlogic.implementation
 import buildlogic.mergeMeta
 
 plugins {
@@ -22,14 +23,13 @@ repositories {
 
 dependencies {
     variants.forEach {
-        it.compileOnly(this, projects.commonApi)
+        it.implementation(this, projects.commonApi)
         it.compileOnly(this, libs.auto.service.annotations)
         it.annotationProcessor(this, libs.auto.service)
     }
 
     lwjgl2.compileOnly(this, libs.lwjgl2)
     lwjgl3.compileOnly(this, libs.lwjgl3)
-    opengl.compileOnly(this, libs.joml)
 }
 
 val mergeMetaTask by tasks.registering(MergeMetaTask::class) {

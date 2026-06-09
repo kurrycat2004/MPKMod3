@@ -27,8 +27,8 @@ public final class ArchaicForgeModContainer implements ForgeModContainer {
 
         @Override
         public Optional<String> invalidReason() {
-            if (!isClassLoaded("cpw.mods.fml.common.DummyModContainer")) {
-                return Optional.of("cpw.mods.fml ModContainer not found");
+            if (!isClassLoaded("cpw.mods.fml.relauncher.CoreModManager")) {
+                return Optional.of("cpw.mods.fml CoreModManager not found");
             }
             return super.invalidReason();
         }

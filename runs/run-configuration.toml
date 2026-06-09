@@ -14,4 +14,5 @@ forge = [
     { minecraft = "1.8.9", java = 8, forge = "11.15.1.2318-1.8.9", mappings = { channel = "stable", version = "20-1.8.8" } },
     { minecraft = "1.12.2", java = 8, forge = "14.23.5.2864", mappings = { channel = "snapshot", version = "20171003-1.12" } },
     { minecraft = "1.20.1", java = 17, forge = "47.4.20", mappings = { channel = "official", version = "1.20.1" } },
+    { minecraft = "26.1.2", java = 25, forge = "64.0.4", mappings = { channel = "official", version = "26.1.2" } },
 ]

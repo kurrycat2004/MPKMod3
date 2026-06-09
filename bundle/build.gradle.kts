@@ -5,6 +5,7 @@ import buildlogic.ShadeJars
 import buildlogic.excludeMeta
 import buildlogic.mergeMeta
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+import org.gradle.internal.extensions.stdlib.capitalized
 import xyz.wagyourtail.jvmdg.gradle.task.DowngradeJar
 import xyz.wagyourtail.jvmdg.gradle.task.ShadeJar
 
@@ -24,108 +25,63 @@ val subproject = configurations.create("subproject") {
     configurations.named(embed.name) { extendsFrom(this@create) }
 }
 
-val subprojectImplementation = configurations.create("subprojectImplementation") {
-    configurations.implementation { extendsFrom(this@create) }
-    configurations.named(subproject.name) { extendsFrom(this@create) }
-}
-
-val subprojectApi = configurations.create("subprojectApi") {
-    configurations.api { extendsFrom(this@create) }
-    configurations.named(subproject.name) { extendsFrom(this@create) }
-}
-
-val embedLibApi = configurations.create("embedLibApi") {
-    configurations.api { extendsFrom(this@create) }
-    configurations.named(embed.name) { extendsFrom(this@create) }
-}
-
-val jvmdowngrader = configurations.create("jvmdowngrader")
-
-repositories {
-    mavenCentral()
-    maven("https://maven.wagyourtail.xyz/snapshots/")
-}
+val subprojectDep = configurations.create("subprojectDep")
 
 dependencies {
-    subprojectApi(projects.commonApi)
+    subproject(projects.commonApi) { isTransitive = false }
+    subprojectDep(projects.commonApiDeps)
+    subproject(projects.commonImpl) { isTransitive = false }
+    //FIXME: seperate jvmdg out of common impl deps, shading itself breaks
+    subprojectDep(projects.commonImplDeps)
+    embed(libs.jtoml)
 
-    subprojectImplementation(projects.injectModMetadata)
-    subprojectImplementation(projects.commonImpl)
-    subprojectImplementation(projects.serviceProviders.log)
-    subprojectImplementation(projects.serviceProviders.lwjgl)
-    //implementation(projects.serviceProviders.transformer)
-    subprojectImplementation(projects.serviceProviders.entrypoint.transformer)
-    subprojectImplementation(projects.serviceProviders.entrypoint.loader)
+    subproject(projects.injectModMetadata)
+    subproject(projects.serviceProviders.log)
+    subproject(projects.serviceProviders.lwjgl)
+    //subproject(projects.serviceProviders.transformer)
+    subproject(projects.serviceProviders.entrypoint.transformer)
+    subproject(projects.serviceProviders.entrypoint.loader)
 
     moduleJar(projects.modules.main)
-
-    jvmdgJavaApi(libs.jvmdowngrader.java.api) {
-        artifact { classifier = "downgraded-8" }
-    }
-
-    jvmdowngrader(libs.jvmdowngrader)
-    compileOnly(libs.jvmdowngrader) {
-        exclude(group = "org.ow2.asm", module = "asm")
-        exclude(group = "org.ow2.asm", module = "asm-tree")
-        exclude(group = "org.ow2.asm", module = "asm-commons")
-        exclude(group = "org.ow2.asm", module = "asm-util")
-    }
-
-    embedLibApi(libs.jtoml)
 }
 
 val currentJava = java.toolchain.languageVersion.map {
     JavaVersion.toVersion(it.asInt())
 }
 
-tasks.jar { enabled = false }
-
-val jvmdgJavaApiJar = tasks.register<ShadowJar>("jvmdgJavaApiJar") {
-    group = "jvmdowngrader"
-    description = "Creates the java-api jar for jvmdg with relocated asm."
-    archiveBaseName = "java-api"
-    duplicatesStrategy = DuplicatesStrategy.INCLUDE
-    failOnDuplicateEntries = true
-
-    configurations = listOf(jvmdgJavaApi)
-    exclude("module-info.class")
-    relocate("org.objectweb.asm", "xyz.wagyourtail.jvmdg.shade.asm")
-}
-
-val jvmdgJar = tasks.register<ShadowJar>("jvmdgJar") {
-    group = "jvmdowngrader"
-    description = "Creates the jvmdg library jar with relocated asm."
-    archiveBaseName = "jvmdowngrader"
-    duplicatesStrategy = DuplicatesStrategy.INCLUDE
-    failOnDuplicateEntries = true
-
-    configurations = listOf(jvmdowngrader)
-
-    from(jvmdgJavaApiJar.map { it.archiveFile }) {
-        into("META-INF/lib")
-        rename { "java-api.jar" }
-    }
-
-    exclude("module-info.class")
-    relocate("org.objectweb.asm", "xyz.wagyourtail.jvmdg.shade.asm")
-    /*minimize {
-        include(dependency("org.ow2.asm:.*:.*"))
-    }*/
-}
-
-val mergeSubprojectMeta = tasks.register<MergeMetaTask>("mergeSubprojectMeta") {
+val mergeMainMeta = tasks.register<MergeMetaTask>("mergeMainMeta") {
     description = "Merges all MANIFEST.MF files from subprojects"
     mergeServices.set(false)
     sourceJars.from(subproject)
 }
-
-val shadowJar = tasks.register<ShadowJar>("shadowJar") {
-    description = "Creates the mod jar including all subprojects and embedded libs (excluding jvmdg)."
+val mainJar = tasks.register<ShadowJar>("mainJar") {
+    description = "Creates the mod jar including all subprojects"
+    archiveAppendix.set(name)
     archiveClassifier.set("java${currentJava.get()}")
     duplicatesStrategy = DuplicatesStrategy.INCLUDE
-    configurations = listOf(embed)
 
-    mergeMeta(mergeSubprojectMeta)
+    configurations = listOf(embed)
+    mergeMeta(mergeMainMeta)
+
+    from(rootProject.layout.projectDirectory.file("LICENSE"))
+
+    mergeServiceFiles()
+    failOnDuplicateEntries = true
+}
+
+val mergeDepMeta = tasks.register<MergeMetaTask>("mergeDepMeta") {
+    description = "Merges all MANIFEST.MF files from subprojects"
+    mergeServices.set(false)
+    sourceJars.from(subprojectDep)
+}
+val depJar = tasks.register<ShadowJar>("depJar") {
+    description = "Creates a jar containing all to-be-embedded deps"
+    archiveAppendix.set(name)
+    archiveClassifier.set("java${currentJava.get()}")
+    duplicatesStrategy = DuplicatesStrategy.INCLUDE
+
+    configurations = listOf(subprojectDep)
+    mergeMeta(mergeDepMeta)
 
     mergeServiceFiles()
     failOnDuplicateEntries = true
@@ -135,37 +91,49 @@ val moduleJars = configurations.named(moduleJar.name)
 
 // target java versions
 listOf(
+    JavaVersion.VERSION_25,
     JavaVersion.VERSION_21,
     JavaVersion.VERSION_17,
     JavaVersion.VERSION_1_8,
 ).forEach { javaVersion ->
     //val downgradedModuleJarsTask = downgradeJars(moduleJarsJavaCurrent, javaVersion)
-    val mainJar = if (javaVersion == currentJava.get()) {
-        shadowJar
-    } else {
-        registerDowngradeJarTask(shadowJar, javaVersion)
-    }
+    val mainJar = registerDowngradeJarTask(mainJar, javaVersion)
+    val depJar = registerDowngradeJarTask(depJar, javaVersion)
     val bundleJarTask = registerBundleJarTask(
         moduleJars,
         mainJar,
-        jvmdgJar,
+        depJar,
         javaVersion
     )
     registerOutgoing(bundleJarTask, javaVersion)
+    if (javaVersion == JavaVersion.VERSION_1_8) {
+        configurations.runtimeElements {
+            attributes {
+                attribute(TargetJvmVersion.TARGET_JVM_VERSION_ATTRIBUTE, 8)
+            }
+            outgoing.artifacts.clear()
+            outgoing.artifact(bundleJarTask)
+        }
+    }
 }
 
 fun registerBundleJarTask(
     moduleJars: Provider<out FileCollection>,
     mainJar: TaskProvider<out Jar>,
-    jvmdgJar: TaskProvider<out Jar>,
+    depJar: TaskProvider<out Jar>,
     javaVersion: JavaVersion
 ) = tasks.register<MergingJar>("bundleJarJava${javaVersion.majorVersion}") {
     group = "build"
-    description = "Bundles the main jar, jvmdg jar and all mpkmodules into a single jar."
+    description = "Bundles the main jar, dep jar and all mpkmodules into a single jar."
     archiveAppendix.set("bundle")
     archiveClassifier.set("java${javaVersion.majorVersion}")
+    duplicatesStrategy = DuplicatesStrategy.FAIL
 
-    mergeJar(mainJar, jvmdgJar)
+    filesMatching("io/github/kurrycat/mpkmod/shaded/**") {
+        duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    }
+
+    mergeJar(mainJar, depJar)
     into("mpkmodules") { from(moduleJars) }
 }
 
@@ -191,21 +159,40 @@ fun registerDowngradeJarsTask(
     return shadedJars.map { it.outputDirectory.asFileTree }
 }
 
+abstract class SingleTaskTypeLock : BuildService<BuildServiceParameters.None>
+
+val singleTaskTypeLock = gradle.sharedServices.registerIfAbsent(
+    "singleTaskTypeLock",
+    SingleTaskTypeLock::class.java
+) {
+    maxParallelUsages.set(1)
+}
+
 fun registerDowngradeJarTask(task: TaskProvider<out Jar>, javaVersion: JavaVersion): TaskProvider<out Jar> {
+    if (javaVersion == currentJava.get()) {
+        return task
+    }
+
     val major = javaVersion.majorVersion.toInt()
 
-    val downgradedJar = tasks.register<DowngradeJar>("downgradeToJava${major}") {
+    val downgradedJar = tasks.register<DowngradeJar>("downgrade${task.name.capitalized()}ToJava${major}") {
         description = "Downgrades the main jar to Java $javaVersion"
         inputFile.set(task.flatMap { it.archiveFile })
         downgradeTo.set(javaVersion)
+        archiveAppendix.set(task.name)
         archiveClassifier.set("java$major")
+        destinationDirectory.set(temporaryDir)
     }
 
-    val shadedJar = tasks.register<ShadeJar>("shadeDowngradedJava${major}Jar") {
+    val shadedJar = tasks.register<ShadeJar>("shadeDowngraded${task.name.capitalized()}Java${major}Jar") {
         description = "Shades the downgraded to Java $javaVersion mod jar with its required java-api parts"
         inputFile.set(downgradedJar.flatMap { it.archiveFile })
         shadePath.set { "io/github/kurrycat/mpkmod/shaded/" }
+        archiveAppendix.set(task.name)
         archiveClassifier.set("java$major-shaded")
+        destinationDirectory.set(temporaryDir)
+        //FIXME: remove after https://github.com/unimined/JvmDowngrader/issues/43 is fixed
+        usesService(singleTaskTypeLock)
     }
 
     return shadedJar
@@ -217,6 +204,10 @@ fun registerOutgoing(task: TaskProvider<out Task>, javaVersion: JavaVersion) {
         isCanBeResolved = false
 
         attributes {
+            attribute(Usage.USAGE_ATTRIBUTE, objects.named(Usage.JAVA_RUNTIME))
+            attribute(Category.CATEGORY_ATTRIBUTE, objects.named(Category.LIBRARY))
+            attribute(LibraryElements.LIBRARY_ELEMENTS_ATTRIBUTE, objects.named(LibraryElements.JAR))
+            attribute(Bundling.BUNDLING_ATTRIBUTE, objects.named(Bundling.SHADOWED))
             attribute(TargetJvmVersion.TARGET_JVM_VERSION_ATTRIBUTE, javaVersion.majorVersion.toInt())
         }
 
@@ -248,4 +239,16 @@ tasks.sourcesJar {
     mergeMeta(sourcesMergeMetaTask)
 
     from(rootProject.layout.projectDirectory.file("LICENSE"))
+}
+
+tasks.jar { enabled = false }
+
+listOf(
+    configurations.apiElements,
+    configurations.mainSourceElements,
+).forEach {
+    it {
+        outgoing.artifacts.clear()
+        outgoing.variants.clear()
+    }
 }

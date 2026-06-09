@@ -2,7 +2,6 @@ package io.github.kurrycat.mpkmod.api.transformer;
 
 import io.github.kurrycat.mpkmod.api.service.ServiceHandle;
 import io.github.kurrycat.mpkmod.api.service.Services;
-import org.objectweb.asm.tree.ClassNode;
 
 public interface TransformerManager {
     ServiceHandle<TransformerManager> HANDLE = Services.getHandle(TransformerManager.class);
@@ -20,19 +19,14 @@ public interface TransformerManager {
     boolean tryInitialize(Class<?> transformerPipelineType);
 
     /**
-     * @param className the name of the class to be checked
+     * @param context context of the class being loaded
      * @return whether there is a {@link Transformer} which wants to handle the given class
      */
-    boolean shouldTransform(String className);
+    boolean shouldTransform(TransformerContext context);
 
     /**
-     * @param input the {@link ClassNode} to be transformed in-place
-     * @return whether the input node changed
+     * @param classBytes the {@link Class} bytes to be transformed
+     * @return the transformed class bytes, or {@code input} if no transformation happened
      */
-    boolean transform(ClassNode input);
-
-    default boolean tryTransform(String className, ClassNode input) {
-        if (!shouldTransform(className)) return false;
-        return transform(input);
-    }
+    byte[] transform(TransformerContext context, byte[] classBytes);
 }

@@ -9,6 +9,8 @@ import io.github.kurrycat.mpkmod.api.module.ModuleRegistry;
 import io.github.kurrycat.mpkmod.api.service.ServiceProvider;
 import io.github.kurrycat.mpkmod.api.service.StandardServiceProvider;
 
+import java.nio.file.Path;
+
 public class ModLifecycleImpl implements ModLifecycle {
     @AutoService(ServiceProvider.class)
     public static final class Provider extends StandardServiceProvider<ModLifecycle> {
@@ -26,6 +28,8 @@ public class ModLifecycleImpl implements ModLifecycle {
         LOGGER.info("Initialized {} ({}) ModPlatform for loader({}), mc_version({})",
                 App.name(), App.id(), modPlatform.loader(), modPlatform.mcVersion()
         );
+        Path rootPath = modPlatform.rootPaths().getFirst();
+        LOGGER.info("Mod source file system: {}", rootPath.getFileSystem());
 
         ModuleRegistry.HANDLE.get().loadAllModules();
     }

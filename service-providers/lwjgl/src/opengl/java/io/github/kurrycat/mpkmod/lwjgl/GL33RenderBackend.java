@@ -17,7 +17,7 @@ import io.github.kurrycat.mpkmod.lwjgl.constants.GLC11;
 import io.github.kurrycat.mpkmod.lwjgl.constants.GLC15;
 import io.github.kurrycat.mpkmod.lwjgl.constants.GLC20;
 import io.github.kurrycat.mpkmod.lwjgl.constants.GLC30;
-import org.joml.Matrix4f;
+import io.github.kurrycat.mpkmod.shadedlibs.joml.Matrix4f;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;

@@ -17,6 +17,10 @@ runConfigurations.fabric.forEach { fabric ->
     project(":runs:fabric:${fabric.projectName()}") {
         pluginManager.apply(fabricLoomRemapPluginId)
 
+        extensions.configure<JavaPluginExtension> {
+            toolchain.languageVersion = JavaLanguageVersion.of(25)
+        }
+
         repositories {
             maven("https://maven.legacyfabric.net/")
         }
