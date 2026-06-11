@@ -5,6 +5,7 @@ import buildlogic.ShadeJars
 import buildlogic.excludeMeta
 import buildlogic.mergeMeta
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+import org.gradle.api.internal.artifacts.configurations.ConfigurationsProvider
 import org.gradle.internal.extensions.stdlib.capitalized
 import xyz.wagyourtail.jvmdg.gradle.task.DowngradeJar
 import xyz.wagyourtail.jvmdg.gradle.task.ShadeJar
@@ -25,15 +26,15 @@ val subproject = configurations.create("subproject") {
     configurations.named(embed.name) { extendsFrom(this@create) }
 }
 
+val jvmdg = configurations.register("jvmdg")
 val subprojectDep = configurations.create("subprojectDep")
 
 dependencies {
     subproject(projects.commonApi) { isTransitive = false }
     subprojectDep(projects.commonApiDeps)
     subproject(projects.commonImpl) { isTransitive = false }
-    //FIXME: seperate jvmdg out of common impl deps, shading itself breaks
     subprojectDep(projects.commonImplDeps)
-    embed(libs.jtoml)
+    jvmdg(projects.commonImplDeps.jvmdg)
 
     subproject(projects.injectModMetadata)
     subproject(projects.serviceProviders.log)
@@ -103,6 +104,7 @@ listOf(
         moduleJars,
         mainJar,
         depJar,
+        jvmdg,
         javaVersion
     )
     registerOutgoing(bundleJarTask, javaVersion)
@@ -121,6 +123,7 @@ fun registerBundleJarTask(
     moduleJars: Provider<out FileCollection>,
     mainJar: TaskProvider<out Jar>,
     depJar: TaskProvider<out Jar>,
+    jvmdg: Provider<Configuration>,
     javaVersion: JavaVersion
 ) = tasks.register<MergingJar>("bundleJarJava${javaVersion.majorVersion}") {
     group = "build"
@@ -134,6 +137,7 @@ fun registerBundleJarTask(
     }
 
     mergeJar(mainJar, depJar)
+    mergeJars(jvmdg)
     into("mpkmodules") { from(moduleJars) }
 }
 

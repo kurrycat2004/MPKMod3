@@ -8,38 +8,18 @@ val shadePrefix = "io.github.kurrycat.mpkmod.shadedlibs"
 
 val relocate = configurations.create("relocate")
 
-val jvmdgJavaApi = configurations.create("jvmdgJavaApi") {
-    isTransitive = false
-}
-
 repositories {
     mavenCentral()
     maven("https://maven.wagyourtail.xyz/snapshots/")
 }
 
 dependencies {
-    relocate(libs.jvmdowngrader) {
-        isTransitive = false
-    }
-    jvmdgJavaApi(libs.jvmdowngrader.java.api) {
-        artifact { classifier = "downgraded-8" }
-    }
+    relocate(libs.jtoml)
+    relocate(libs.jtoml.serializer.reflect)
 }
 
 tasks.jar { enabled = false }
 tasks.sourcesJar { enabled = false }
-
-val jvmdgJavaApiJar = tasks.register<ShadowJar>("jvmdgJavaApiJar") {
-    group = "jvmdowngrader"
-    description = "Creates the java-api jar for jvmdg with relocated asm."
-    archiveBaseName = "java-api"
-    duplicatesStrategy = DuplicatesStrategy.INCLUDE
-    failOnDuplicateEntries = true
-
-    configurations = listOf(jvmdgJavaApi)
-    exclude("module-info.class")
-    relocate("org.objectweb.asm", "$shadePrefix.asm")
-}
 
 val implementationJar = tasks.register<ShadowJar>("implementationJar") {
     description = "Bundles and relocates all required implementation deps"
@@ -48,12 +28,11 @@ val implementationJar = tasks.register<ShadowJar>("implementationJar") {
     configurations = listOf(relocate)
     exclude("module-info.class")
 
-    relocate("org.objectweb.asm", "$shadePrefix.asm")
+    relocate("io.github.wasabithumb.jtoml", "$shadePrefix.jtoml")
+    relocate("io.github.wasabithumb.recsup", "$shadePrefix.recsup")
 
-    from(jvmdgJavaApiJar.map { it.archiveFile }) {
-        into("META-INF/lib")
-        rename { "java-api.jar" }
-    }
+    mergeServiceFiles()
+    failOnDuplicateEntries = true
 }
 
 tasks.assemble { dependsOn(implementationJar) }
