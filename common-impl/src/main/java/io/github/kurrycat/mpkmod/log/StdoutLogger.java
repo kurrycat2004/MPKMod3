@@ -2,16 +2,27 @@ package io.github.kurrycat.mpkmod.log;
 
 import io.github.kurrycat.mpkmod.api.App;
 import io.github.kurrycat.mpkmod.api.log.ILogger;
+import io.github.kurrycat.mpkmod.util.Flags;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 
-public record StdoutLogger(String name) implements ILogger {
+public final class StdoutLogger implements ILogger {
     public static final StdoutLogger FALLBACK = new StdoutLogger(App.id());
 
     private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm:ss");
+    private final String name;
+    private final Level logLevel;
+
+    public StdoutLogger(String name) {
+        if (!name.matches("[a-zA-Z0-9/]+")) {
+            throw new IllegalArgumentException("Logger name has to match \"[a-zA-Z0-9/]+\", got: " + name);
+        }
+        this.name = name;
+        this.logLevel = currentLogLevel();
+    }
 
     @Override
     public ILogger createSubLogger(String name) {
@@ -20,11 +31,15 @@ public record StdoutLogger(String name) implements ILogger {
 
     @Override
     public void log(Level level, String formatString) {
+        if (shouldNotLog(level)) return;
+
         print(level, formatString, null);
     }
 
     @Override
     public void log(Level level, String formatString, Object var1) {
+        if (shouldNotLog(level)) return;
+
         if (var1 instanceof Throwable t) {
             print(level, formatString, t);
         } else {
@@ -34,6 +49,8 @@ public record StdoutLogger(String name) implements ILogger {
 
     @Override
     public void log(Level level, String formatString, Object var1, Object var2) {
+        if (shouldNotLog(level)) return;
+
         if (var2 instanceof Throwable t) {
             print(level, formatStringWithArgs(formatString, new Object[] { var1 }, 1), t);
         } else {
@@ -43,6 +60,8 @@ public record StdoutLogger(String name) implements ILogger {
 
     @Override
     public void log(Level level, String formatString, Object... vars) {
+        if (shouldNotLog(level)) return;
+
         int argCount = vars == null ? 0 : vars.length;
         Throwable throwable = null;
         int usableArgs = argCount;
@@ -53,6 +72,35 @@ public record StdoutLogger(String name) implements ILogger {
         }
 
         print(level, formatStringWithArgs(formatString, vars, usableArgs), throwable);
+    }
+
+    private boolean shouldNotLog(Level level) {
+        return logLevel.ordinal() > level.ordinal();
+    }
+
+    private Level currentLogLevel() {
+        int loggerLen = name.length();
+        Level logLevel;
+        do {
+            String loggerName = name.substring(0, loggerLen);
+            logLevel = parseLogLevel(loggerName);
+            loggerLen = loggerName.lastIndexOf('/');
+        } while (logLevel == null && loggerLen > 0);
+
+        return logLevel == null ? Level.INFO : logLevel;
+    }
+
+    private Level parseLogLevel(String loggerName) {
+        String logLevelFlag = Flags.getDynString(Flags.LOGGER_PREFIX, loggerName);
+        if (logLevelFlag == null) return null;
+
+        Level logLevel = null;
+        try {
+            logLevel = Level.valueOf(logLevelFlag);
+        } catch (IllegalArgumentException e) {
+            warn("Invalid log level \"{}\" specified for logger \"{}\": ", logLevelFlag, loggerName);
+        }
+        return logLevel;
     }
 
     private void print(Level level, String message, Throwable throwable) {
@@ -81,5 +129,16 @@ public record StdoutLogger(String name) implements ILogger {
 
         sb.append(formatString.substring(lastIndex));
         return sb.toString();
+    }
+
+    @Override
+    public String name() {
+        return name;
+    }
+
+    @Override
+    public String toString() {
+        return "StdoutLogger[" +
+               "name=" + name + ']';
     }
 }

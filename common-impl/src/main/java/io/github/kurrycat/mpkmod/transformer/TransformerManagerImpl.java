@@ -23,10 +23,6 @@ public class TransformerManagerImpl implements TransformerManager {
     }
 
     private static final ILogger LOGGER = ILogger.createLogger(TransformerManager.class.getSimpleName());
-    private static final ILogger.Level ASM_FAIL_LOG_LEVEL =
-            Boolean.getBoolean("mpkmod.transformer.dontWarnOnClassParseFail")
-            ? ILogger.Level.DEBUG
-            : ILogger.Level.WARN;
 
     private static final String MOD_GROUP = App.group().replace('.', '/');
     private static final String EXCLUDE_PREFIX = MOD_GROUP + "/";
@@ -91,7 +87,7 @@ public class TransformerManagerImpl implements TransformerManager {
             reader.accept(node, 0);
             return node;
         } catch (IllegalArgumentException e) {
-            LOGGER.log(ASM_FAIL_LOG_LEVEL,
+            LOGGER.warn(
                     "Failed to parse class: {} with class file version {}",
                     context.binaryClassName(), readMajorVersion(classBytes)
             );

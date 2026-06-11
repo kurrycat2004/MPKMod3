@@ -61,9 +61,11 @@ runConfigurations.forge.forEach { forge ->
             runs {
                 register("client") {
                     workingDir = file("../run/client/")
-                    jvmArgs("-Dmpkmod.service.logProviders=true")
-                    jvmArgs("-Dmpkmod.module.enableModuleLoadStacktrace=true")
                     jvmArgs("-Dfml.coreMods.load=io.github.kurrycat.mpkmod.core.fml.FMLLoadingPlugin")
+
+                    jvmArgs("-Dmpkmod.logger.mpkmod=DEBUG")
+                    jvmArgs("-Dmpkmod.enable_module_load_stacktrace=true")
+
                     //jvmArgs("-Djvmdg.debug.dumpClasses=true")
                     //jvmArgs("-Djvmdg.debug=true")
 

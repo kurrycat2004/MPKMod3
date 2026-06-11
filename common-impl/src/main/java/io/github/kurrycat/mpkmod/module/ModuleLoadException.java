@@ -1,5 +1,6 @@
 package io.github.kurrycat.mpkmod.module;
 
+import io.github.kurrycat.mpkmod.util.Flags;
 import io.github.kurrycat.mpkmod.util.PrefixedPrintWriter;
 
 import java.io.PrintWriter;
@@ -9,7 +10,7 @@ import java.util.List;
 import java.util.Objects;
 
 public class ModuleLoadException extends Exception {
-    public static final boolean ENABLE_STACKTRACE = Boolean.getBoolean("mpkmod.module.enableModuleLoadStacktrace");
+    public static final boolean ENABLE_STACKTRACE = Flags.getBoolean(Flags.ENABLE_MODULE_LOAD_STACKTRACE);
 
     private final String mainMessage;
     private final List<ErrorDetail> errors;

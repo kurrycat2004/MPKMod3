@@ -23,11 +23,9 @@ import java.util.ServiceLoader;
 
 @AutoService(ServiceManager.class)
 public final class ServiceManagerImpl implements ServiceManager {
-    private static final boolean LOG_PROVIDERS = Boolean.getBoolean("mpkmod.service.logProviders");
-    private static final ILogger.Level LOG_LEVEL = LOG_PROVIDERS ? ILogger.Level.INFO : ILogger.Level.DEBUG;
-
-    private ILogger.FixedLevel LOGGER;
     private final Map<Class<?>, List<ServiceProvider>> cache;
+
+    private ILogger LOGGER;
     private boolean initialized = false;
 
     private final ClassValue<RawServiceHolder<?>> HOLDERS = new ClassValue<>() {
@@ -39,14 +37,13 @@ public final class ServiceManagerImpl implements ServiceManager {
 
     public ServiceManagerImpl() {
         LOGGER = StdoutLogger.FALLBACK
-                .createSubLogger(ServiceManager.class.getSimpleName())
-                .createFixed(LOG_LEVEL);
-        LOGGER.log("Initialized service manager using class loader: {}",
+                .createSubLogger(ServiceManager.class.getSimpleName());
+        LOGGER.debug("Initialized service manager using class loader: {}",
                 ServiceManagerImpl.class.getClassLoader());
 
         Map<Class<?>, List<ServiceProvider>> cache = new HashMap<>();
         for (ServiceProvider provider : ServiceLoader.load(ServiceProvider.class, ServiceManager.class.getClassLoader())) {
-            cache.computeIfAbsent(provider.type(), k -> new ArrayList<>())
+            cache.computeIfAbsent(provider.type(), _ -> new ArrayList<>())
                     .add(provider);
         }
         for (List<ServiceProvider> providers : cache.values()) {
@@ -67,15 +64,14 @@ public final class ServiceManagerImpl implements ServiceManager {
     @Override
     public void initialize() {
         if (initialized) return;
-        LOGGER.log("Initializing logger service...");
+        LOGGER.debug("Initializing logger service...");
         // don't use ILogger.createLogger() here to prevent early initializing the Holder subclass, which would cause a cycle
         LOGGER = Services.getHandle(LogManager.class).get()
-                .createLogger(App.id() + "/" + ServiceManager.class.getSimpleName())
-                .createFixed(LOG_LEVEL);
-        if (LOGGER.parentLogger() instanceof StdoutLogger) {
-            LOGGER.log("Failed to initialize logger service, continuing with fallback logger");
+                .createLogger(App.id() + "/" + ServiceManager.class.getSimpleName());
+        if (LOGGER instanceof StdoutLogger) {
+            LOGGER.info("Failed to initialize logger service, continuing with fallback logger");
         } else {
-            LOGGER.log("Initialized logger service");
+            LOGGER.info("Initialized logger service");
         }
         initialized = true;
     }
@@ -109,7 +105,7 @@ public final class ServiceManagerImpl implements ServiceManager {
             throw new IllegalArgumentException("Failed to switch to service provider " + provider.name() + ": " + reason.get());
         }
 
-        LOGGER.log("Switching service {} from {} to provider {}",
+        LOGGER.info("Switching service {} from {} to provider {}",
                 provider.type().getName(),
                 HOLDERS.get(provider.type()).get().getClass().getName(),
                 provider.name()
@@ -121,27 +117,26 @@ public final class ServiceManagerImpl implements ServiceManager {
         Map<ServiceProvider, String> reasons = new IdentityHashMap<>();
         List<ServiceProvider> providers = cache.get(serviceClass);
 
-        LOGGER.log("Loading service provider for {}", serviceClass.getName());
+        LOGGER.debug("Loading service provider for {}", serviceClass.getName());
         if (providers == null || providers.isEmpty()) {
-            String message = "No service provider found for " + serviceClass.getName();
-            LOGGER.log(message);
-            throw new IllegalArgumentException(message);
+            LOGGER.debug("No service provider found for ", serviceClass.getName());
+            throw new IllegalArgumentException("No service provider found for " + serviceClass.getName());
         }
-        LOGGER.log("Found {} potential provider(s):", providers.size());
+        LOGGER.debug("Found {} potential provider(s):", providers.size());
         for (ServiceProvider provider : providers) {
-            LOGGER.log("\t{} with priority {}", provider.name(), provider.priority());
+            LOGGER.debug("\t{} with priority {}", provider.name(), provider.priority());
         }
 
         for (ServiceProvider provider : providers) {
             Optional<String> reason = provider.invalidReason();
             if (reason.isPresent()) {
-                LOGGER.log("Service provider {} with priority {} is invalid: {}",
+                LOGGER.debug("Service provider {} with priority {} is invalid: {}",
                         provider.name(), provider.priority(), reason.get());
                 reasons.put(provider, reason.get());
                 continue;
             }
             Object service = provider.provide();
-            LOGGER.log("Selecting service provider {} with priority {}",
+            LOGGER.debug("Selecting service provider {} with priority {}",
                     provider.name(), provider.priority());
             return service;
         }
