@@ -22,23 +22,23 @@ runConfigurations.forge.forEach { forge ->
         pluginManager.apply(forgeGradlePluginId)
         pluginManager.apply(forgeRenamerPluginId)
 
-        extensions.configure<JavaPluginExtension> {
+        configure<JavaPluginExtension> {
             toolchain.languageVersion = JavaLanguageVersion.of(forge.java)
         }
 
         repositories {
             mavenLocal()
-            extensions.getByType<MinecraftExtension>().mavenizer(this)
-            maven(extensions.getByType<ForgeGradleExtension>().forgeMaven)
-            maven(extensions.getByType<ForgeGradleExtension>().minecraftLibsMaven)
+            the<MinecraftExtension>().mavenizer(this)
+            maven(the<ForgeGradleExtension>().forgeMaven)
+            maven(the<ForgeGradleExtension>().minecraftLibsMaven)
             maven("https://cursemaven.com")
         }
 
-        extensions.configure<MinecraftExtension> {
+        configure<MinecraftExtension> {
             mappings(forge.mappings.channel, forge.mappings.version)
         }
 
-        extensions.configure<MinecraftExtensionForProject> {
+        configure<MinecraftExtensionForProject> {
             dependencies {
                 add(
                     "implementation",
@@ -50,7 +50,7 @@ runConfigurations.forge.forEach { forge ->
             runs {
                 register("client") {
                     workingDir = file("../run/client/")
-                    jvmArgs("-Dfml.coreMods.load=io.github.kurrycat.mpkmod.core.fml.FMLLoadingPlugin")
+                    jvmArgs("-Dfml.coreMods.load=io.github.kurrycat.mpkmod.transformer.fml.FMLLoadingPlugin")
 
                     jvmArgs("-Dmpkmod.logger.mpkmod=DEBUG")
                     jvmArgs("-Dmpkmod.enable_module_load_stacktrace=true")
@@ -78,8 +78,8 @@ runConfigurations.forge.forEach { forge ->
             }
         }
 
-        /*extensions.configure<RenamerExtension> {
-            mappings.from(extensions.getByType<MinecraftExtensionForProject>().dependency.toSrgFile)
+        /*configure<RenamerExtension> {
+            mappings.from(the<MinecraftExtensionForProject>().dependency.toSrgFile)
 
             dependencies {
                 add(

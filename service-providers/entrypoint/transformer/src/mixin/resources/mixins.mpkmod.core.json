@@ -1,5 +1,0 @@
-{
-    "required": true,
-    "minVersion": "0.8",
-    "plugin": "io.github.kurrycat.mpkmod.core.mixin.CoreMixinPlugin"
-}

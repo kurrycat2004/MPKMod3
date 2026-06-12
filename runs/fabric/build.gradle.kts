@@ -17,7 +17,7 @@ runConfigurations.fabric.forEach { fabric ->
     project(":runs:fabric:${fabric.projectName()}") {
         pluginManager.apply(fabricLoomRemapPluginId)
 
-        extensions.configure<JavaPluginExtension> {
+        configure<JavaPluginExtension> {
             toolchain.languageVersion = JavaLanguageVersion.of(25)
         }
 
@@ -32,7 +32,7 @@ runConfigurations.fabric.forEach { fabric ->
             add("runtimeOnly", bundleProject)
         }
 
-        extensions.configure<LoomGradleExtensionAPI> {
+        configure<LoomGradleExtensionAPI> {
             runs {
                 named("client") {
                     runDir("../run/client")

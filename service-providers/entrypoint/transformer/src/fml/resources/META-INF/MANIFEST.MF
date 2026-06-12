@@ -1,3 +1,0 @@
-Manifest-Version: 1.0
-FMLCorePlugin: io.github.kurrycat.mpkmod.core.fml.FMLLoadingPlugin
-FMLCorePluginContainsFMLMod: true

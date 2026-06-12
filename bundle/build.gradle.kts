@@ -5,7 +5,6 @@ import buildlogic.ShadeJars
 import buildlogic.excludeMeta
 import buildlogic.mergeMeta
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
-import org.gradle.api.internal.artifacts.configurations.ConfigurationsProvider
 import org.gradle.internal.extensions.stdlib.capitalized
 import xyz.wagyourtail.jvmdg.gradle.task.DowngradeJar
 import xyz.wagyourtail.jvmdg.gradle.task.ShadeJar
@@ -37,11 +36,16 @@ dependencies {
     jvmdg(projects.commonImplDeps.jvmdg)
 
     subproject(projects.injectModMetadata)
+
+    subproject(projects.serviceProviders.lifecycle.fabric)
+    subproject(projects.serviceProviders.lifecycle.forgeArchaic)
+    subproject(projects.serviceProviders.lifecycle.forgeLex)
+    subproject(projects.serviceProviders.lifecycle.forgeVintage)
     subproject(projects.serviceProviders.log)
     subproject(projects.serviceProviders.lwjgl)
-    //subproject(projects.serviceProviders.transformer)
-    subproject(projects.serviceProviders.entrypoint.transformer)
-    subproject(projects.serviceProviders.entrypoint.loader)
+    subproject(projects.serviceProviders.transformer.fml)
+    subproject(projects.serviceProviders.transformer.mixin)
+    subproject(projects.serviceProviders.transformer.modlauncher)
 
     moduleJar(projects.modules.main)
 }
