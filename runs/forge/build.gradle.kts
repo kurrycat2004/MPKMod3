@@ -3,7 +3,6 @@ import buildlogic.projectName
 import net.minecraftforge.gradle.ForgeGradleExtension
 import net.minecraftforge.gradle.MinecraftExtension
 import net.minecraftforge.gradle.MinecraftExtensionForProject
-import net.minecraftforge.gradle.shadow.net.minecraftforge.gradleutils.shared.ToolsExtension
 
 plugins {
     alias(libs.plugins.forge.gradle) apply false
@@ -33,16 +32,6 @@ runConfigurations.forge.forEach { forge ->
             maven(extensions.getByType<ForgeGradleExtension>().forgeMaven)
             maven(extensions.getByType<ForgeGradleExtension>().minecraftLibsMaven)
             maven("https://cursemaven.com")
-        }
-
-        //TODO: remove after https://github.com/MinecraftForge/MinecraftMavenizer/pull/29 is merged
-        extensions.configure<ToolsExtension> {
-            configure("slimelauncher") {
-                version = "0.2.1"
-            }
-            configure("mavenizer") {
-                version = "0.5.10"
-            }
         }
 
         extensions.configure<MinecraftExtension> {
