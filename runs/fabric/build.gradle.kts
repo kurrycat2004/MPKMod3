@@ -36,8 +36,8 @@ runConfigurations.fabric.forEach { fabric ->
             runs {
                 named("client") {
                     runDir("../run/client")
-                    vmArgs("-Dmpkmod.service.logProviders=true")
-                    vmArgs("-Dmpkmod.module.enableModuleLoadStacktrace=true")
+                    vmArgs("-Dmpkmod.logger.mpkmod=DEBUG")
+                    vmArgs("-Dmpkmod.enable_module_load_stacktrace=true")
 
                     if (fabric.minecraft.startsWith("1.7")) {
                         programArgs("--userProperties", "{}")
