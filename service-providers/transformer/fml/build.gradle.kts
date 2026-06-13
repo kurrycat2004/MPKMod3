@@ -12,6 +12,8 @@ repositories {
 }
 
 dependencies {
-    compileOnly(projects.commonApi)
+    implementation(projects.commonApi)
+
+    implementation(projects.serviceProviders.api)
     compileOnly(libs.bundles.asm4)
 }

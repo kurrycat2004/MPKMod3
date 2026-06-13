@@ -38,7 +38,8 @@ sourceSets.main {
 dependencies {
     compileOnly(libs.auto.service.annotations)
     annotationProcessor(libs.auto.service)
-    compileOnly(projects.commonApi)
+
+    implementation(projects.commonApi)
 
     compileOnly(projects.injectModMetadata)
     implementation(projects.serviceProviders.lifecycle.forgeCommon)

@@ -10,7 +10,9 @@ sourceSets.main {
 dependencies {
     compileOnly(libs.auto.service.annotations)
     annotationProcessor(libs.auto.service)
-    compileOnly(projects.commonApi)
 
+    implementation(projects.commonApi)
+
+    implementation(projects.serviceProviders.api)
     implementation(projects.serviceProviders.lifecycle.forgeCommon)
 }

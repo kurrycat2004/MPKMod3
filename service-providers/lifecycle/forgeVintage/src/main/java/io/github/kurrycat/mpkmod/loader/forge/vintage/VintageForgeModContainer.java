@@ -5,7 +5,7 @@ import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 import io.github.kurrycat.mpkmod.api.App;
 import io.github.kurrycat.mpkmod.api.entrypoint.ModLifecycle;
-import io.github.kurrycat.mpkmod.api.loader.ForgeModContainer;
+import io.github.kurrycat.mpkmod.api.lifecycle.ForgeModContainer;
 import io.github.kurrycat.mpkmod.api.service.ServiceProvider;
 import io.github.kurrycat.mpkmod.api.service.StandardServiceProvider;
 import io.github.kurrycat.mpkmod.loader.forge.CommonForgeEntrypoint;

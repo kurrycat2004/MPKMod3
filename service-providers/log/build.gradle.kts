@@ -2,6 +2,7 @@ import buildlogic.MergeMetaTask
 import buildlogic.annotationProcessor
 import buildlogic.compileOnly
 import buildlogic.excludeMeta
+import buildlogic.implementation
 import buildlogic.mergeMeta
 
 plugins {
@@ -16,9 +17,10 @@ val variants = listOf(shared, log4j, slf4j)
 
 dependencies {
     variants.forEach {
-        it.compileOnly(this, projects.commonApi)
         it.compileOnly(this, libs.auto.service.annotations)
         it.annotationProcessor(this, libs.auto.service)
+
+        it.implementation(this, projects.commonApi)
     }
     log4j.compileOnly(this, libs.log4j.api)
     slf4j.compileOnly(this, libs.slf4j.api)

@@ -23,9 +23,10 @@ repositories {
 
 dependencies {
     variants.forEach {
-        it.implementation(this, projects.commonApi)
         it.compileOnly(this, libs.auto.service.annotations)
         it.annotationProcessor(this, libs.auto.service)
+
+        it.implementation(this, projects.commonApi)
     }
 
     lwjgl2.compileOnly(this, libs.lwjgl2)

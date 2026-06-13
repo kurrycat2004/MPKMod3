@@ -1,31 +1,26 @@
 package buildlogic
 
-import org.gradle.api.artifacts.Configuration
+import org.gradle.api.Action
 import org.gradle.api.file.ArchiveOperations
-import org.gradle.api.provider.Provider
-import org.gradle.api.tasks.TaskProvider
+import org.gradle.api.file.ConfigurableFileCollection
+import org.gradle.api.file.CopySpec
+import org.gradle.api.tasks.Classpath
 import org.gradle.api.tasks.bundling.Jar
 import javax.inject.Inject
 
-abstract class MergingJar @Inject constructor(private val archives: ArchiveOperations) : Jar() {
-    fun mergeJar(vararg jarTasks: TaskProvider<out Jar>) {
-        jarTasks.forEach { jarTask ->
-            dependsOn(jarTask)
+abstract class MergingJar : Jar() {
+    @get:Inject
+    abstract val archives: ArchiveOperations
 
-            val archiveFile = jarTask.flatMap { it.archiveFile }
+    @get:Classpath
+    abstract val inputJars: ConfigurableFileCollection
 
-            from(archiveFile.map { file ->
-                archives.zipTree(file.asFile)
-            })
-        }
-    }
-
-    fun mergeJars(configuration: Provider<Configuration>) {
-        dependsOn(configuration)
-
-        from(configuration.map {
-            it.filter { file -> file.extension == "jar" }
-                .map { file -> archives.zipTree(file) }
-        })
+    fun mergeJars(action: Action<in CopySpec> = Action {}) {
+        from(inputJars.elements.map { elements ->
+            elements
+                .map { it.asFile }
+                .filter { it.extension == "jar" }
+                .map { archives.zipTree(it) }
+        }, action)
     }
 }

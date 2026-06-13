@@ -4,7 +4,6 @@ import buildlogic.MergingJar
 import buildlogic.ShadeJars
 import buildlogic.excludeMeta
 import buildlogic.mergeMeta
-import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import org.gradle.internal.extensions.stdlib.capitalized
 import xyz.wagyourtail.jvmdg.gradle.task.DowngradeJar
 import xyz.wagyourtail.jvmdg.gradle.task.ShadeJar
@@ -14,25 +13,29 @@ plugins {
     id("xyz.wagyourtail.jvmdowngrader")
 }
 
-val jvmdgJavaApi = configurations.create("jvmdgJavaApi") {
-    isTransitive = false
-}
 val moduleJar = configurations.create("moduleJar")
 
 val embed = configurations.create("embed")
 
-val subproject = configurations.create("subproject") {
-    configurations.named(embed.name) { extendsFrom(this@create) }
+val subproject = configurations.create("subproject")
+val subprojectLib = configurations.create("subprojectLib")
+val subprojectShadowLib = configurations.create("subprojectShadowLib") {
+    configurations.named(subprojectLib.name) { extendsFrom(this@create) }
+}
+val jvmdg = configurations.register("jvmdg")
+configurations.named(subprojectLib.name) {
+    @Suppress("UnstableApiUsage")
+    extendsFrom(jvmdg)
 }
 
-val jvmdg = configurations.register("jvmdg")
-val subprojectDep = configurations.create("subprojectDep")
+val subprojectNoLib = subproject - subprojectLib
+
 
 dependencies {
-    subproject(projects.commonApi) { isTransitive = false }
-    subprojectDep(projects.commonApiDeps)
-    subproject(projects.commonImpl) { isTransitive = false }
-    subprojectDep(projects.commonImplDeps)
+    subproject(projects.commonApi)
+    subprojectShadowLib(projects.commonApiDeps)
+    subproject(projects.commonImpl)
+    subprojectShadowLib(projects.commonImplDeps)
     jvmdg(projects.commonImplDeps.jvmdg)
 
     subproject(projects.injectModMetadata)
@@ -56,40 +59,34 @@ val currentJava = java.toolchain.languageVersion.map {
 
 val mergeMainMeta = tasks.register<MergeMetaTask>("mergeMainMeta") {
     description = "Merges all MANIFEST.MF files from subprojects"
-    mergeServices.set(false)
-    sourceJars.from(subproject)
+    sourceJars.from(subprojectNoLib)
 }
-val mainJar = tasks.register<ShadowJar>("mainJar") {
+val mainJar = tasks.register<MergingJar>("mainJar") {
     description = "Creates the mod jar including all subprojects"
     archiveAppendix.set(name)
     archiveClassifier.set("java${currentJava.get()}")
-    duplicatesStrategy = DuplicatesStrategy.INCLUDE
+    duplicatesStrategy = DuplicatesStrategy.FAIL
 
-    configurations = listOf(embed)
+    inputJars.from(subprojectNoLib)
+    mergeJars { excludeMeta() }
     mergeMeta(mergeMainMeta)
 
     from(rootProject.layout.projectDirectory.file("LICENSE"))
-
-    mergeServiceFiles()
-    failOnDuplicateEntries = true
 }
 
 val mergeDepMeta = tasks.register<MergeMetaTask>("mergeDepMeta") {
     description = "Merges all MANIFEST.MF files from subprojects"
-    mergeServices.set(false)
-    sourceJars.from(subprojectDep)
+    sourceJars.from(subprojectShadowLib)
 }
-val depJar = tasks.register<ShadowJar>("depJar") {
+val depJar = tasks.register<MergingJar>("depJar") {
     description = "Creates a jar containing all to-be-embedded deps"
     archiveAppendix.set(name)
     archiveClassifier.set("java${currentJava.get()}")
-    duplicatesStrategy = DuplicatesStrategy.INCLUDE
+    duplicatesStrategy = DuplicatesStrategy.FAIL
 
-    configurations = listOf(subprojectDep)
+    inputJars.from(subprojectShadowLib)
+    mergeJars { excludeMeta() }
     mergeMeta(mergeDepMeta)
-
-    mergeServiceFiles()
-    failOnDuplicateEntries = true
 }
 
 val moduleJars = configurations.named(moduleJar.name)
@@ -140,8 +137,11 @@ fun registerBundleJarTask(
         duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     }
 
-    mergeJar(mainJar, depJar)
-    mergeJars(jvmdg)
+    inputJars.from(mainJar.flatMap { it.archiveFile })
+    inputJars.from(depJar.flatMap { it.archiveFile })
+    inputJars.from(jvmdg)
+    mergeJars()
+
     into("mpkmodules") { from(moduleJars) }
 }
 

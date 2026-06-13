@@ -41,6 +41,7 @@ include("common-impl-deps")
 include("common-impl-deps:jvmdg")
 include("inject-mod-metadata")
 
+include("service-providers:api")
 include("service-providers:lifecycle:fabric")
 include("service-providers:lifecycle:forgeArchaic")
 include("service-providers:lifecycle:forgeCommon")
