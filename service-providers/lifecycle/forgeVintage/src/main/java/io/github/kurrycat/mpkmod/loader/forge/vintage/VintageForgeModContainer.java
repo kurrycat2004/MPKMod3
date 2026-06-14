@@ -7,7 +7,8 @@ import io.github.kurrycat.mpkmod.api.lifecycle.forge.ForgeModContainer;
 import io.github.kurrycat.mpkmod.api.service.ServiceProvider;
 import io.github.kurrycat.mpkmod.api.service.StandardServiceProvider;
 import io.github.kurrycat.mpkmod.loader.forge.CommonForgeEntrypoint;
-import io.github.kurrycat.mpkmod.loader.forge.event.guava.GuavaEventManager;
+import io.github.kurrycat.mpkmod.loader.forge.event.EventManager;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.DummyModContainer;
 import net.minecraftforge.fml.common.LoadController;
 import net.minecraftforge.fml.common.ModMetadata;
@@ -74,7 +75,8 @@ public final class VintageForgeModContainer implements ForgeModContainer {
 
         @Override
         public boolean registerBus(EventBus bus, LoadController controller) {
-            GuavaEventManager.registerEventReceivers(bus);
+            EventManager.registerFMLEventReceiver(bus::register);
+            EventManager.registerForgeEventReceiver(MinecraftForge.EVENT_BUS::register);
             return true;
         }
     }

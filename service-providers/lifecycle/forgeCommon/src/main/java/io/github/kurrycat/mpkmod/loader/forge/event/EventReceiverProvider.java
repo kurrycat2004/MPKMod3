@@ -1,6 +1,6 @@
-package io.github.kurrycat.mpkmod.loader.forge.event.guava;
+package io.github.kurrycat.mpkmod.loader.forge.event;
 
-public abstract class GuavaEventReceiverProvider {
+public abstract class EventReceiverProvider {
     public abstract boolean canProvide();
 
     /**
@@ -16,7 +16,7 @@ public abstract class GuavaEventReceiverProvider {
     /**
      * Should always return the same instance
      */
-    public abstract IGuavaEventReceiver provide();
+    public abstract IEventReceiver provide();
 
     protected final boolean doesClassExist(String className) {
         try {

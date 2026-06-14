@@ -10,7 +10,8 @@ import io.github.kurrycat.mpkmod.api.lifecycle.forge.ForgeModContainer;
 import io.github.kurrycat.mpkmod.api.service.ServiceProvider;
 import io.github.kurrycat.mpkmod.api.service.StandardServiceProvider;
 import io.github.kurrycat.mpkmod.loader.forge.CommonForgeEntrypoint;
-import io.github.kurrycat.mpkmod.loader.forge.event.guava.GuavaEventManager;
+import io.github.kurrycat.mpkmod.loader.forge.event.EventManager;
+import net.minecraftforge.common.MinecraftForge;
 
 import java.io.File;
 import java.util.List;
@@ -71,7 +72,8 @@ public final class ArchaicForgeModContainer implements ForgeModContainer {
 
         @Override
         public boolean registerBus(EventBus bus, LoadController controller) {
-            GuavaEventManager.registerEventReceivers(bus);
+            EventManager.registerFMLEventReceiver(bus::register);
+            EventManager.registerForgeEventReceiver(MinecraftForge.EVENT_BUS::register);
             return true;
         }
     }
