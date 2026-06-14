@@ -33,6 +33,7 @@ val generateForgeModToml by tasks.registering(GenerateModMetadata::class) {
 val stubs = sourceSets.create("stubs")
 sourceSets.main {
     compileClasspath += stubs.output
+    resources.srcDir(generateForgeModToml.flatMap { it.outputDir })
 }
 
 dependencies {

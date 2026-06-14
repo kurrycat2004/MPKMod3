@@ -45,7 +45,7 @@ val generateFabricModJson by tasks.registering(GenerateModMetadata::class) {
 }
 
 sourceSets.main {
-    resources.srcDir(generateFabricModJson.map { it.outputDir })
+    resources.srcDir(generateFabricModJson.flatMap { it.outputDir })
 }
 
 repositories {
