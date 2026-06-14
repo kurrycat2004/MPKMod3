@@ -11,6 +11,7 @@ public final class Flags {
 
     public static final String ENABLE_MODULE_LOAD_STACKTRACE = "enable_module_load_stacktrace";
     public static final String LOGGER_FORCE_MODID_PREFIX = "logger_force_modid_prefix";
+    public static final String LOGGER_FORCE_STDOUT = "logger_force_stdout";
 
     public static final String LOGGER_PREFIX = "logger";
 

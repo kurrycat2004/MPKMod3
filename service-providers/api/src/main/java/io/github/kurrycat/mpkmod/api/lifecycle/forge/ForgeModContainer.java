@@ -1,4 +1,4 @@
-package io.github.kurrycat.mpkmod.api.lifecycle;
+package io.github.kurrycat.mpkmod.api.lifecycle.forge;
 
 import io.github.kurrycat.mpkmod.api.service.ServiceHandle;
 import io.github.kurrycat.mpkmod.api.service.Services;

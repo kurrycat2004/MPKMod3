@@ -2,17 +2,15 @@ package io.github.kurrycat.mpkmod.loader.forge.vintage;
 
 import com.google.auto.service.AutoService;
 import com.google.common.eventbus.EventBus;
-import com.google.common.eventbus.Subscribe;
 import io.github.kurrycat.mpkmod.api.App;
-import io.github.kurrycat.mpkmod.api.entrypoint.ModLifecycle;
-import io.github.kurrycat.mpkmod.api.lifecycle.ForgeModContainer;
+import io.github.kurrycat.mpkmod.api.lifecycle.forge.ForgeModContainer;
 import io.github.kurrycat.mpkmod.api.service.ServiceProvider;
 import io.github.kurrycat.mpkmod.api.service.StandardServiceProvider;
 import io.github.kurrycat.mpkmod.loader.forge.CommonForgeEntrypoint;
+import io.github.kurrycat.mpkmod.loader.forge.event.guava.GuavaEventManager;
 import net.minecraftforge.fml.common.DummyModContainer;
 import net.minecraftforge.fml.common.LoadController;
 import net.minecraftforge.fml.common.ModMetadata;
-import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.relauncher.CoreModManager;
 
 import java.io.File;
@@ -76,19 +74,8 @@ public final class VintageForgeModContainer implements ForgeModContainer {
 
         @Override
         public boolean registerBus(EventBus bus, LoadController controller) {
-            bus.register(EventReceiver.INSTANCE);
+            GuavaEventManager.registerEventReceivers(bus);
             return true;
-        }
-    }
-
-    public static class EventReceiver {
-        private static final EventReceiver INSTANCE = new EventReceiver();
-
-        private EventReceiver() {}
-
-        @Subscribe
-        public void onInitialize(FMLInitializationEvent ignored) {
-            ModLifecycle.HANDLE.get().init();
         }
     }
 }

@@ -1,6 +1,6 @@
 package io.github.kurrycat.mpkmod.transformer.fml;
 
-import io.github.kurrycat.mpkmod.api.lifecycle.ForgeModContainer;
+import io.github.kurrycat.mpkmod.api.lifecycle.forge.ForgeModContainer;
 
 import java.util.Map;
 

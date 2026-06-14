@@ -40,7 +40,6 @@ public class LexForgeModPlatform implements ModPlatform {
 
     @Override
     public Path gamePath() {
-        // should be fine
         return FMLPaths.GAMEDIR.get();
     }
 
