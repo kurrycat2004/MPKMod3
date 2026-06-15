@@ -1,6 +1,7 @@
 package io.github.kurrycat.mpkmod.lwjgl;
 
 import io.github.kurrycat.mpkmod.api.resource.IResource;
+import io.github.kurrycat.mpkmod.api.resource.ResourceManager;
 import io.github.kurrycat.mpkmod.lwjgl.api.IGL20;
 import io.github.kurrycat.mpkmod.lwjgl.api.LwjglBackend;
 import io.github.kurrycat.mpkmod.lwjgl.constants.GLC11;
@@ -13,9 +14,10 @@ public final class ShaderUtil {
 
     public static int createProgram(IResource vertexShader, IResource fragmentShader) throws IOException {
         final IGL20 gl20 = LwjglBackend.HANDLE.get().gl20();
+        final ResourceManager resourceManager = ResourceManager.HANDLE.get();
 
-        String vertexSource = vertexShader.readUtf8();
-        String fragmentSource = fragmentShader.readUtf8();
+        String vertexSource = resourceManager.readUTF8(vertexShader);
+        String fragmentSource = resourceManager.readUTF8(fragmentShader);
 
         int vs = compile(gl20, GLC20.GL_VERTEX_SHADER, vertexSource);
         int fs = compile(gl20, GLC20.GL_FRAGMENT_SHADER, fragmentSource);

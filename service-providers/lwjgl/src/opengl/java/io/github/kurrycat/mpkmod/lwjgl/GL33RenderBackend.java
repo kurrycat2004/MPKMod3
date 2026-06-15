@@ -8,6 +8,7 @@ import io.github.kurrycat.mpkmod.api.render.RenderBackend;
 import io.github.kurrycat.mpkmod.api.render.RenderState;
 import io.github.kurrycat.mpkmod.api.render.texture.TextureManager;
 import io.github.kurrycat.mpkmod.api.resource.IResource;
+import io.github.kurrycat.mpkmod.api.resource.ResourceManager;
 import io.github.kurrycat.mpkmod.api.service.ServiceProvider;
 import io.github.kurrycat.mpkmod.api.service.StandardServiceProvider;
 import io.github.kurrycat.mpkmod.lwjgl.api.IGL30;
@@ -81,6 +82,7 @@ public final class GL33RenderBackend implements RenderBackend {
 
     public GL33RenderBackend() {
         final IGL30 gl30 = LwjglBackend.HANDLE.get().gl30();
+        final ResourceManager resourceManager = ResourceManager.HANDLE.get();
 
         vao = gl30.glGenVertexArrays();
         vboPos = gl30.glGenBuffers();
@@ -97,8 +99,8 @@ public final class GL33RenderBackend implements RenderBackend {
 
         try {
             shaderProgram = ShaderUtil.createProgram(
-                    IResource.ofSelf("shaders/gl33.vert"),
-                    IResource.ofSelf("shaders/gl33.frag")
+                    resourceManager.resource("shaders/gl33.vert"),
+                    resourceManager.resource("shaders/gl33.frag")
             );
         } catch (IOException e) {
             throw new RuntimeException("Failed to load shaders", e);
