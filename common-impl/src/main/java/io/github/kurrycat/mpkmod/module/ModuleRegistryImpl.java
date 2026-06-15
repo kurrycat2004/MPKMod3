@@ -19,6 +19,8 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -39,9 +41,13 @@ public final class ModuleRegistryImpl implements ModuleRegistry {
     private final static ILogger MODULE_LOGGER = ILogger.createLogger("module");
 
     private final Set<String> disabledModuleIds = new HashSet<>();
-    private final Map<Path, DiscoveredModule> errorModules = new HashMap<>();
+    private final Map<Path, DiscoveredModule> erroredModules = new HashMap<>();
     private final Map<String, DiscoveredModule> disabledModules = new HashMap<>();
     private final Map<String, LoadedModule> loadedModules = new HashMap<>();
+    private final Collection<ModuleEntrypoint> loadedEntrypoints = Collections.unmodifiableCollection(
+            loadedModules.values()
+    );
+
     private final Map<String, Set<String>> moduleToDependants = new HashMap<>();
     private final Map<String, Set<String>> moduleToDependencies = new HashMap<>();
 
@@ -73,7 +79,7 @@ public final class ModuleRegistryImpl implements ModuleRegistry {
     }
 
     public void loadModules() {
-        errorModules.clear();
+        erroredModules.clear();
 
         List<DiscoveredModule> discoveredModules = new ArrayList<>();
         ModuleCache.extractInternalModules();
@@ -90,7 +96,7 @@ public final class ModuleRegistryImpl implements ModuleRegistry {
         Map<String, DiscoveredModule> toLoad = new HashMap<>();
         for (DiscoveredModule module : discoveredModules) {
             if (module.isError()) {
-                errorModules.put(module.source(), module);
+                erroredModules.put(module.source(), module);
             } else if (!disabledModuleIds.contains(module.entry().id())) {
                 toLoad.put(module.entry().id(), module);
             } else {
@@ -120,7 +126,7 @@ public final class ModuleRegistryImpl implements ModuleRegistry {
                     if (!loaded.entry().version().satisfies(depVersion)) {
                         modifiedToLoad = true;
                         iterator.remove();
-                        errorModules.put(module.source(), module.withError(
+                        erroredModules.put(module.source(), module.withError(
                                 new ModuleLoadException.Builder("Unsatisfied version constraint")
                                         .addError("Requires the " + depId + " version to match " + depVersion +
                                                   ", but found version " + loaded.entry().version())
@@ -136,12 +142,12 @@ public final class ModuleRegistryImpl implements ModuleRegistry {
                     LoadedModule loadedModule = loadModule(loadedModules, module);
                     loadedModules.put(loadedModule.entry().id(), loadedModule);
                 } catch (ModuleLoadException e) {
-                    errorModules.put(module.source(), module.withError(e));
+                    erroredModules.put(module.source(), module.withError(e));
                 } catch (Exception e) {
                     ModuleLoadException exception = new ModuleLoadException.Builder("Unexpected error while trying to load module: " + module.entry().id())
                             .addError(e)
                             .build();
-                    errorModules.put(module.source(), module.withError(exception));
+                    erroredModules.put(module.source(), module.withError(exception));
                 }
             }
         }
@@ -155,7 +161,7 @@ public final class ModuleRegistryImpl implements ModuleRegistry {
                     .toList();
             if (!missing.isEmpty()) {
                 it.remove();
-                errorModules.put(mod.source(), mod.withError(
+                erroredModules.put(mod.source(), mod.withError(
                         new ModuleLoadException.Builder("Missing dependency")
                                 .addError("Module " + mod.entry().id() +
                                           " requires missing module(s): " + String.join(", ", missing))
@@ -183,7 +189,7 @@ public final class ModuleRegistryImpl implements ModuleRegistry {
 
             for (String modId : comp) {
                 DiscoveredModule mod = toLoad.remove(modId);
-                errorModules.put(mod.source(), mod.withError(
+                erroredModules.put(mod.source(), mod.withError(
                         new ModuleLoadException.Builder("Circular dependency")
                                 .addError("Cycle: " + StringUtil.joinCycle(comp, start, " -> "))
                                 .build()
@@ -262,18 +268,23 @@ public final class ModuleRegistryImpl implements ModuleRegistry {
     }
 
     @Override
-    public boolean isModuleLoaded(String moduleId) {
-        return loadedModules.containsKey(moduleId);
-    }
-
-    @Override
     public void loadAllModules() {
         loadModules();
         LOGGER.info("Loaded modules: {}", loadedModules.keySet());
         LOGGER.info("Disabled modules: {}", disabledModules.keySet());
         LOGGER.info("Errored modules:");
-        for (var e : errorModules.values()) {
+        for (var e : erroredModules.values()) {
             LOGGER.info("", e.error());
         }
+    }
+
+    @Override
+    public boolean isModuleLoaded(String moduleId) {
+        return loadedModules.containsKey(moduleId);
+    }
+
+    @Override
+    public Collection<ModuleEntrypoint> loadedEntrypoints() {
+        return loadedEntrypoints;
     }
 }

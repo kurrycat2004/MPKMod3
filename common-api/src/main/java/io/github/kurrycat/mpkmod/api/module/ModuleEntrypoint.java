@@ -18,4 +18,9 @@ public interface ModuleEntrypoint {
      * Cleanup logic should go here.
      */
     void onUnload();
+
+    /**
+     * Called once every frame.
+     */
+    void onFrame();
 }
