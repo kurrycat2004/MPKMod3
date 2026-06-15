@@ -3,6 +3,7 @@ package io.github.kurrycat.mpkmod.modules.main;
 import io.github.kurrycat.mpkmod.api.log.ILogger;
 import io.github.kurrycat.mpkmod.api.module.IModuleEntry;
 import io.github.kurrycat.mpkmod.api.module.ModuleEntrypoint;
+import io.github.kurrycat.mpkmod.api.render.CommandReceiver;
 import io.github.kurrycat.mpkmod.api.render.Render2D;
 
 import java.awt.*;
@@ -30,5 +31,6 @@ public class MainModule implements ModuleEntrypoint {
     @Override
     public void onFrame() {
         Render2D.HANDLE.get().pushRect(10, 10, 30, 30, Color.RED.getRGB());
+        CommandReceiver.HANDLE.get().flushDrawCommands();
     }
 }
