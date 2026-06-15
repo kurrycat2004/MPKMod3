@@ -27,7 +27,7 @@ public class RenderGameOverlayReceiverProvider extends ForgeEventReceiverProvide
         return EventReceiver.INSTANCE;
     }
 
-    private static class EventReceiver implements IEventReceiver {
+    public static class EventReceiver implements IEventReceiver {
         private static final EventReceiver INSTANCE = new EventReceiver();
 
         @cpw.mods.fml.common.eventhandler.SubscribeEvent
