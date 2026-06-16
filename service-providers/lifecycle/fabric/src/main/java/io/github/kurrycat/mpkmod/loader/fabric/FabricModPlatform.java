@@ -5,6 +5,7 @@ import io.github.kurrycat.mpkmod.api.App;
 import io.github.kurrycat.mpkmod.api.loader.ModPlatform;
 import io.github.kurrycat.mpkmod.api.service.ServiceProvider;
 import io.github.kurrycat.mpkmod.api.service.StandardServiceProvider;
+import io.github.kurrycat.mpkmod.service.util.ServiceUtil;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
 
@@ -21,7 +22,7 @@ public class FabricModPlatform implements ModPlatform {
 
         @Override
         public Optional<String> invalidReason() {
-            if (!isClassLoaded("net.fabricmc.loader.api.FabricLoader")) {
+            if (!ServiceUtil.doesClassExist("net.fabricmc.loader.api.FabricLoader")) {
                 return Optional.of("FabricLoader not found");
             }
             return super.invalidReason();

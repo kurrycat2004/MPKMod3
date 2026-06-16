@@ -6,6 +6,7 @@ import io.github.kurrycat.mpkmod.api.log.LogManager;
 import io.github.kurrycat.mpkmod.api.service.ServiceProvider;
 import io.github.kurrycat.mpkmod.api.service.StandardServiceProvider;
 import io.github.kurrycat.mpkmod.log.LoggerWrapper;
+import io.github.kurrycat.mpkmod.service.util.ServiceUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,7 +21,7 @@ public final class SLF4JLogManager implements LogManager {
 
         @Override
         public Optional<String> invalidReason() {
-            if (!isClassLoaded("org.slf4j.LoggerFactory")) {
+            if (!ServiceUtil.doesClassExist("org.slf4j.LoggerFactory")) {
                 return Optional.of("SLF4J is not available");
             }
             return Optional.empty();

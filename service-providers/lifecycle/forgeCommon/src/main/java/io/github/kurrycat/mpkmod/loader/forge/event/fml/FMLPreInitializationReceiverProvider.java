@@ -4,13 +4,14 @@ import com.google.auto.service.AutoService;
 import com.google.common.eventbus.Subscribe;
 import io.github.kurrycat.mpkmod.loader.forge.event.EventManager;
 import io.github.kurrycat.mpkmod.loader.forge.event.IEventReceiver;
+import io.github.kurrycat.mpkmod.service.util.ServiceUtil;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 
 @AutoService(FMLEventReceiverProvider.class)
 public class FMLPreInitializationReceiverProvider extends FMLEventReceiverProvider {
     @Override
     public boolean canProvide() {
-        return doesClassExist("net.minecraftforge.fml.common.event.FMLPreInitializationEvent");
+        return ServiceUtil.doesClassExist("net.minecraftforge.fml.common.event.FMLPreInitializationEvent");
     }
 
     @Override

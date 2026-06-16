@@ -3,13 +3,14 @@ package io.github.kurrycat.mpkmod.loader.forge.event.forge;
 import com.google.auto.service.AutoService;
 import io.github.kurrycat.mpkmod.api.entrypoint.ModLoop;
 import io.github.kurrycat.mpkmod.loader.forge.event.IEventReceiver;
+import io.github.kurrycat.mpkmod.service.util.ServiceUtil;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 
 @AutoService(ForgeEventReceiverProvider.class)
 public class RenderGameOverlayReceiverProvider extends ForgeEventReceiverProvider {
     @Override
     public boolean canProvide() {
-        return doesClassExist("net.minecraftforge.client.event.RenderGameOverlayEvent$Text");
+        return ServiceUtil.doesClassExist("net.minecraftforge.client.event.RenderGameOverlayEvent$Text");
     }
 
     @Override

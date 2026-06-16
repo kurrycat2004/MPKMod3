@@ -12,4 +12,5 @@ dependencies {
     annotationProcessor(libs.auto.service)
 
     implementation(projects.commonApi)
+    implementation(projects.serviceProviders.util)
 }

@@ -6,6 +6,7 @@ import io.github.kurrycat.mpkmod.api.service.StandardServiceProvider;
 import io.github.kurrycat.mpkmod.lwjgl.api.IGL30;
 import io.github.kurrycat.mpkmod.lwjgl.api.IGLCapabilities;
 import io.github.kurrycat.mpkmod.lwjgl.api.LwjglBackend;
+import io.github.kurrycat.mpkmod.service.util.ServiceUtil;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GLCapabilities;
 
@@ -20,7 +21,7 @@ public final class Lwjgl3Backend extends GL30Impl implements LwjglBackend, IGLCa
 
         @Override
         public Optional<String> invalidReason() {
-            if (!isClassLoaded("org.lwjgl.opengl.GLCapabilities")) {
+            if (!ServiceUtil.doesClassExist("org.lwjgl.opengl.GLCapabilities")) {
                 return Optional.of("No LWJGL3 found");
             }
             return Optional.empty();

@@ -6,6 +6,7 @@ import io.github.kurrycat.mpkmod.api.loader.ModPlatform;
 import io.github.kurrycat.mpkmod.api.service.ServiceProvider;
 import io.github.kurrycat.mpkmod.api.service.StandardServiceProvider;
 import io.github.kurrycat.mpkmod.loader.forge.CommonForgeEntrypoint;
+import io.github.kurrycat.mpkmod.service.util.ServiceUtil;
 
 import java.nio.file.Path;
 import java.util.List;
@@ -20,7 +21,7 @@ public class ArchaicForgeModPlatform implements ModPlatform {
 
         @Override
         public Optional<String> invalidReason() {
-            if (!isClassLoaded("cpw.mods.fml.common.Loader")) {
+            if (!ServiceUtil.doesClassExist("cpw.mods.fml.common.Loader")) {
                 return Optional.of("cpw.mods.fml.common.Loader not found");
             }
             return super.invalidReason();

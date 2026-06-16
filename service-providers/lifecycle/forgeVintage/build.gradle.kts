@@ -14,5 +14,6 @@ dependencies {
     implementation(projects.commonApi)
 
     implementation(projects.serviceProviders.api)
+    implementation(projects.serviceProviders.util)
     implementation(projects.serviceProviders.lifecycle.forgeCommon)
 }

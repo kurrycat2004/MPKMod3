@@ -5,6 +5,7 @@ import io.github.kurrycat.mpkmod.api.loader.ModPlatform;
 import io.github.kurrycat.mpkmod.api.service.ServiceProvider;
 import io.github.kurrycat.mpkmod.api.service.StandardServiceProvider;
 import io.github.kurrycat.mpkmod.loader.forge.CommonForgeEntrypoint;
+import io.github.kurrycat.mpkmod.service.util.ServiceUtil;
 import net.minecraftforge.fml.common.Loader;
 
 import java.nio.file.Path;
@@ -20,7 +21,7 @@ public class VintageForgeModPlatform implements ModPlatform {
 
         @Override
         public Optional<String> invalidReason() {
-            if (!isClassLoaded("net.minecraftforge.fml.common.Loader")) {
+            if (!ServiceUtil.doesClassExist("net.minecraftforge.fml.common.Loader")) {
                 return Optional.of("net.minecraftforge.fml.common.Loader not found");
             }
             return super.invalidReason();

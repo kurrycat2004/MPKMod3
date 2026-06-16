@@ -52,6 +52,7 @@ include("service-providers:lwjgl")
 include("service-providers:transformer:fml")
 include("service-providers:transformer:mixin")
 include("service-providers:transformer:modlauncher")
+include("service-providers:util")
 
 include("modules:main")
 

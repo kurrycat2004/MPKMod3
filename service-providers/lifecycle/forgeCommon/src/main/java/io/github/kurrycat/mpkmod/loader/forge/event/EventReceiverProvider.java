@@ -17,13 +17,4 @@ public abstract class EventReceiverProvider {
      * Should always return the same instance
      */
     public abstract IEventReceiver provide();
-
-    protected final boolean doesClassExist(String className) {
-        try {
-            Class.forName(className, false, getClass().getClassLoader());
-            return true;
-        } catch (ClassNotFoundException e) {
-            return false;
-        }
-    }
 }

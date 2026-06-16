@@ -21,6 +21,7 @@ dependencies {
         it.annotationProcessor(this, libs.auto.service)
 
         it.implementation(this, projects.commonApi)
+        it.implementation(this, projects.serviceProviders.util)
     }
     log4j.compileOnly(this, libs.log4j.api)
     slf4j.compileOnly(this, libs.slf4j.api)

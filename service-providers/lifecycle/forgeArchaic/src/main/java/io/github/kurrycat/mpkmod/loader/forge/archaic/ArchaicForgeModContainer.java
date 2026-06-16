@@ -11,6 +11,7 @@ import io.github.kurrycat.mpkmod.api.service.ServiceProvider;
 import io.github.kurrycat.mpkmod.api.service.StandardServiceProvider;
 import io.github.kurrycat.mpkmod.loader.forge.CommonForgeEntrypoint;
 import io.github.kurrycat.mpkmod.loader.forge.event.EventManager;
+import io.github.kurrycat.mpkmod.service.util.ServiceUtil;
 import net.minecraftforge.common.MinecraftForge;
 
 import java.io.File;
@@ -26,7 +27,7 @@ public final class ArchaicForgeModContainer implements ForgeModContainer {
 
         @Override
         public Optional<String> invalidReason() {
-            if (!isClassLoaded("cpw.mods.fml.relauncher.CoreModManager")) {
+            if (!ServiceUtil.doesClassExist("cpw.mods.fml.relauncher.CoreModManager")) {
                 return Optional.of("cpw.mods.fml CoreModManager not found");
             }
             return super.invalidReason();

@@ -42,6 +42,7 @@ dependencies {
 
     implementation(projects.commonApi)
 
-    compileOnly(projects.injectModMetadata)
+    implementation(projects.injectModMetadata)
+    implementation(projects.serviceProviders.util)
     implementation(projects.serviceProviders.lifecycle.forgeCommon)
 }

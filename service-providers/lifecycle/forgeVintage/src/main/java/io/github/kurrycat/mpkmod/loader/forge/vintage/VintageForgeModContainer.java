@@ -8,6 +8,7 @@ import io.github.kurrycat.mpkmod.api.service.ServiceProvider;
 import io.github.kurrycat.mpkmod.api.service.StandardServiceProvider;
 import io.github.kurrycat.mpkmod.loader.forge.CommonForgeEntrypoint;
 import io.github.kurrycat.mpkmod.loader.forge.event.EventManager;
+import io.github.kurrycat.mpkmod.service.util.ServiceUtil;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.DummyModContainer;
 import net.minecraftforge.fml.common.LoadController;
@@ -27,7 +28,7 @@ public final class VintageForgeModContainer implements ForgeModContainer {
 
         @Override
         public Optional<String> invalidReason() {
-            if (!isClassLoaded("net.minecraftforge.fml.relauncher.CoreModManager")) {
+            if (!ServiceUtil.doesClassExist("net.minecraftforge.fml.relauncher.CoreModManager")) {
                 return Optional.of("net.minecraftforge.fml CoreModManager not found");
             }
             return super.invalidReason();

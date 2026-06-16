@@ -27,6 +27,7 @@ dependencies {
         it.annotationProcessor(this, libs.auto.service)
 
         it.implementation(this, projects.commonApi)
+        it.implementation(this, projects.serviceProviders.util)
     }
 
     lwjgl2.compileOnly(this, libs.lwjgl2)

@@ -20,13 +20,4 @@ public abstract class StandardServiceProvider<T> implements TypedServiceProvider
     public Class<T> type() {
         return type;
     }
-
-    protected final boolean isClassLoaded(String className) {
-        try {
-            Class.forName(className, false, getClass().getClassLoader());
-            return true;
-        } catch (ClassNotFoundException e) {
-            return false;
-        }
-    }
 }

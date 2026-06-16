@@ -6,6 +6,7 @@ import io.github.kurrycat.mpkmod.api.log.LogManager;
 import io.github.kurrycat.mpkmod.api.service.ServiceProvider;
 import io.github.kurrycat.mpkmod.api.service.StandardServiceProvider;
 import io.github.kurrycat.mpkmod.log.LoggerWrapper;
+import io.github.kurrycat.mpkmod.service.util.ServiceUtil;
 
 import java.util.Optional;
 
@@ -18,7 +19,7 @@ public final class Log4JLogManager implements LogManager {
 
         @Override
         public Optional<String> invalidReason() {
-            if (!isClassLoaded("org.apache.logging.log4j.LogManager")) {
+            if (!ServiceUtil.doesClassExist("org.apache.logging.log4j.LogManager")) {
                 return Optional.of("Log4J2 is not available");
             }
             return Optional.empty();

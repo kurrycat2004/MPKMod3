@@ -5,12 +5,13 @@ import com.google.common.eventbus.Subscribe;
 import cpw.mods.fml.common.event.FMLInitializationEvent;
 import io.github.kurrycat.mpkmod.api.entrypoint.ModLifecycle;
 import io.github.kurrycat.mpkmod.loader.forge.event.IEventReceiver;
+import io.github.kurrycat.mpkmod.service.util.ServiceUtil;
 
 @AutoService(FMLEventReceiverProvider.class)
 public class CpwInitializationReceiverProvider extends FMLEventReceiverProvider {
     @Override
     public boolean canProvide() {
-        return doesClassExist("cpw.mods.fml.common.event.FMLInitializationEvent");
+        return ServiceUtil.doesClassExist("cpw.mods.fml.common.event.FMLInitializationEvent");
     }
 
     @Override

@@ -5,6 +5,7 @@ import io.github.kurrycat.mpkmod.api.loader.ModPlatform;
 import io.github.kurrycat.mpkmod.api.service.ServiceProvider;
 import io.github.kurrycat.mpkmod.api.service.StandardServiceProvider;
 import io.github.kurrycat.mpkmod.loader.forge.CommonForgeEntrypoint;
+import io.github.kurrycat.mpkmod.service.util.ServiceUtil;
 import net.minecraftforge.fml.loading.FMLPaths;
 import net.minecraftforge.versions.forge.ForgeVersion;
 
@@ -21,7 +22,7 @@ public class LexForgeModPlatform implements ModPlatform {
 
         @Override
         public Optional<String> invalidReason() {
-            if (!isClassLoaded("net.minecraftforge.versions.forge.ForgeVersion")) {
+            if (!ServiceUtil.doesClassExist("net.minecraftforge.versions.forge.ForgeVersion")) {
                 return Optional.of("net.minecraftforge.versions.forge.ForgeVersion not found");
             }
             return super.invalidReason();
