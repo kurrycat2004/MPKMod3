@@ -24,4 +24,8 @@ public class DummyModContainer {
     public boolean registerBus(EventBus bus, LoadController controller) {
         throw new IllegalStateException("STUB");
     }
+
+    public Class<?> getCustomResourcePackClass() {
+        throw new IllegalStateException("STUB");
+    }
 }

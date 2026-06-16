@@ -77,5 +77,17 @@ public final class ArchaicForgeModContainer implements ForgeModContainer {
             EventManager.registerForgeEventReceiver(MinecraftForge.EVENT_BUS::register);
             return true;
         }
+
+        @Override
+        public Class<?> getCustomResourcePackClass() {
+            try {
+                return Class.forName(
+                        "cpw.mods.fml.client.FMLFileResourcePack",
+                        true, getClass().getClassLoader()
+                );
+            } catch (ClassNotFoundException ignored) {
+                return null;
+            }
+        }
     }
 }

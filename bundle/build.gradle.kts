@@ -46,6 +46,7 @@ dependencies {
     subproject(projects.serviceProviders.lifecycle.forgeVintage)
     subproject(projects.serviceProviders.log)
     subproject(projects.serviceProviders.lwjgl)
+    subproject(projects.serviceProviders.resource)
     subproject(projects.serviceProviders.transformer.fml)
     subproject(projects.serviceProviders.transformer.mixin)
     subproject(projects.serviceProviders.transformer.modlauncher)
