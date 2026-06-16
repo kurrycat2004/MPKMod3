@@ -2,6 +2,8 @@ package io.github.kurrycat.mpkmod.service.util;
 
 import io.github.kurrycat.mpkmod.api.service.StandardServiceProvider;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Executable;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Optional;
@@ -47,7 +49,7 @@ public abstract class ClasspathServiceProvider<T> extends StandardServiceProvide
             argTypes[i] = argType;
         }
 
-        Method method = getMethod(clazz, requiredMethod.methodName, returnType, argTypes);
+        Executable method = getMethod(clazz, requiredMethod.methodName, returnType, argTypes);
         if (method == null) return missingMethod(requiredMethod);
 
         return Optional.empty();
@@ -82,13 +84,18 @@ public abstract class ClasspathServiceProvider<T> extends StandardServiceProvide
         };
     }
 
-    private Method getMethod(
+    private Executable getMethod(
             Class<?> ownerClass,
             String methodName,
             Class<?> returnType,
             Class<?>... argTypes
     ) {
         try {
+            if (methodName.equals("<init>")) {
+                Constructor<?> constructor = ownerClass.getConstructor(argTypes);
+                if (!returnType.equals(void.class)) return null;
+                return constructor;
+            }
             Method method = ownerClass.getMethod(methodName, argTypes);
             if (!method.getReturnType().equals(returnType)) return null;
             return method;
