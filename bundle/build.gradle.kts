@@ -47,6 +47,7 @@ dependencies {
     subproject(projects.serviceProviders.log)
     subproject(projects.serviceProviders.lwjgl)
     subproject(projects.serviceProviders.render.state)
+    subproject(projects.serviceProviders.render.texture)
     subproject(projects.serviceProviders.resource)
     subproject(projects.serviceProviders.transformer.fml)
     subproject(projects.serviceProviders.transformer.mixin)
